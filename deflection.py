@@ -6,7 +6,7 @@ import F100
 
 def deformation(x_vals):
     """ x is a numpy array, returns deflection due to flex on every x as np.array
-        as well as the curvature on every position"""
+        as well as the Moment times stifness and shear force on every position"""
     l1 = F100.x2 - F100.x1
     l2 = F100.x3 - F100.x2
 
@@ -15,10 +15,10 @@ def deformation(x_vals):
 
     A = np.zeros((4, 4))
 
-    A[0, :] = [(-l1) ** 3, +((-l1) ** 2), -l1, 0]
+    A[0, :] = [(-l1) ** 3, ((-l1) ** 2), -l1, 0]
     A[1, :] = [0, l2 ** 2, l2, l2 ** 3]
-    A[2, :] = [6 * (-l1), 2 * (-l1), 0, 0]
-    A[3, :] = [0, 2 * l2, 0, 6 * l2]
+    A[2, :] = [6 * (-l1), 2, 0, 0]
+    A[3, :] = [0, 2, 0, 6 * l2]
 
     b = [F100.d1, F100.d3, 0, 0]
 
@@ -52,14 +52,19 @@ def deformation(x_vals):
     for i in x_vals:
         defs.append(deformation(i))
 
-    max_curv = 2 * x[1]
-    # we know curvature is max at Hinge 2, so and it looks like a tipi is 0 after
+    defs = np.array(defs)
 
-    return np.array(defs)
+    return (defs, np.gradient(np.gradient(defs, x_vals), x_vals) ,np.gradient(np.gradient(np.gradient(defs, x_vals), x_vals), x_vals))
 
-l = np.linspace(0, F100.la, 100)
+l = np.linspace(0, F100.la, 10000)
 a = deformation(l)
-plt.plot(l, a)
-plt.show()
-plt.plot(l,np.gradient(np.gradient(a, l), l))
+plt.subplot(212)
+plt.plot(l, a[0])
+
+plt.subplot(221)
+plt.plot(l, a[1])
+
+plt.subplot(222)
+plt.plot(l, a[2])
+
 plt.show()
