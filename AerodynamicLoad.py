@@ -49,6 +49,7 @@ for j in range (40):
 # plot surface
 #---------------------------------------
 
-    
+plt.imshow(arr)   
+plt.show()
 
         

@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import F100
+import material
 
-
-def deformation(x_vals):
+def deformation(x_vals, Inertia):
     """ x is a numpy array, returns deflection due to flex on every x as np.array
-        as well as the Moment times stifness and shear force on every position"""
+        as well as the Moment times stifness and shear force on every position
+        also returns F1y, F2y, F3y"""
     l1 = F100.x2 - F100.x1
     l2 = F100.x3 - F100.x2
 
@@ -52,12 +53,18 @@ def deformation(x_vals):
     for i in x_vals:
         defs.append(deformation(i))
 
+    m_max = Inertia * material.E * 2*x[1]
+    print(l1, l2, m_max)
+    F1y = m_max/(l1)
+    F3y = m_max/(l2)
+    F2y = (F1y+F3y) * -1
     defs = np.array(defs)
 
-    return (defs, np.gradient(np.gradient(defs, x_vals), x_vals) ,np.gradient(np.gradient(np.gradient(defs, x_vals), x_vals), x_vals))
+    return (defs, np.gradient(np.gradient(defs*Inertia*material.E, x_vals), x_vals) ,np.gradient(np.gradient(np.gradient(defs*Inertia*material.E, x_vals), x_vals), x_vals), F1y, F2y, F3y)
 
 l = np.linspace(0, F100.la, 10000)
-a = deformation(l)
+a = deformation(l, 0.0002)
+print(a[3], a[4], a[5])
 plt.subplot(212)
 plt.plot(l, a[0])
 
