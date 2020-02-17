@@ -68,6 +68,6 @@ areasum = sum(Area)
 zcentroidtotal = ztimesA/areasum
 ycentroidtotal = ytimesA/areasum
 
-print(zcentroidtotal, ycentroidtotal)
+#print(zcentroidtotal, ycentroidtotal)
     
     
