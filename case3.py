@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import F100
 import material
+from geometry import A_l, A_t
 
 def case3(x_vals, M_1):
     """ x is a numpy array and M1 is the virtual moment from case 2
@@ -33,11 +34,9 @@ def case3(x_vals, M_1):
     moment = np.array(moment)
 
     # from internal moment we can do angle of twist and shear flow
-    A_l = 1/4/2*pi*F100.h**2
-    A_t = F100.h*(F100.Ca-F100.h/2)/2
     S_l = F100.h/F100.tsp+pi*F100.h/F100.tsk
     S_t = F100.h/F100.tsp+2*sqrt(F100.h**2/4+(F100.Ca-F100.h/2)**2)/F100.tsk
-    T_l_t = S_t*A_l**2/S_l/A_t**2
+    T_l_t = S_t*A_l()**2/S_l/A_t()**2
 
     q_t = []
     q_l = []
@@ -46,8 +45,8 @@ def case3(x_vals, M_1):
         T_t = m/(1+T_l_t)
         T_l = T_l_t*T_t
 
-        q_t.append(T_t/2/A_t)
-        q_l.append(T_l/2/A_t)
+        q_t.append(T_t/2/A_t())
+        q_l.append(T_l/2/A_t())
 
     q_t = np.array(q_t)
     q_l = np.array(q_l)
