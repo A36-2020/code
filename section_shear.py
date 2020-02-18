@@ -25,12 +25,13 @@ class section():
 
         self.q_l += q_l0
         self.q_t += q_t0
-
-        print(self.q_t[-1], self.q_l[0])
+        print(q_t0, q_l0)
+        self.sc = (q_l0*V_l+q_t0*V_t)/V/V
 
         # extract the spar
         l_end_i = int(F100.h/ds)
-        self.s = self.q_l[:l_end_i]+np.flip(self.q_t[-l_end_i:])/2
+        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))/2
+        self.p_x = np.array([0 for _ in self.s])
         self.p_y = np.linspace(-F100.h/2,F100.h/2,self.s.shape[0])
 
         self.q_l = self.q_l[l_end_i:]
@@ -38,6 +39,8 @@ class section():
 
         self.q_t = self.q_t[:-l_end_i]
         self.p_t = self.p_t[:-l_end_i]
+
+        
         
     def show(self):
         xt = np.array([self.x_t(p) for p in self.p_t ])
@@ -45,9 +48,12 @@ class section():
         xl = np.array([self.x_l(p) for p in self.p_l ])
         yl = np.array([self.y_l(p) for p in self.p_l ])
 
-        plt.scatter(xt,yt,c=np.abs(self.q_t))
-        plt.scatter(xl,yl,c=np.abs(self.q_l))
-        plt.scatter(np.zeros(self.s.shape),self.p_y,c=np.abs(self.s))
+        x = np.hstack((xt,xl,self.p_x))
+        y = np.hstack((yt,yl,self.p_y))
+        c = np.hstack((self.q_t, self.q_l, self.s))
+
+        plt.scatter(self.sc, 0)
+        plt.scatter(x,y,c=(c))
         plt.colorbar()
         plt.axis('equal')
         plt.show()
