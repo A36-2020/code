@@ -6,31 +6,36 @@ import material
 import matplotlib.pyplot as plt
 
 class section():
-    def __init__(self, n, V):
-        self.n = n
+    def __init__(self, ds, V):
+        self.d = ds
         I = geometry.Inertia_xx()
         V_lt = geometry.S_al()/geometry.S_at()
         V_t = V/(1+V_lt)
         V_l = V_lt*V_t
-        print(V_l, V_t)
+        print(V_l, V_t, V_l + V_t, V)
 
-        self.p_l = np.linspace(0,geometry.S_l(),n)
-        self.p_t = np.linspace(0,geometry.S_t(),n)
+        self.p_l = np.arange(0,geometry.S_l(),ds)
+        self.p_t = np.arange(0,geometry.S_t(),ds)
 
-        self.q_l = np.array([self.line_integral_l(x) for x in self.p_l])
-        self.q_t = np.array([self.line_integral_t(x) for x in self.p_t])
+        self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/geometry.Inertia_l()
+        self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/geometry.Inertia_t()
 
-        q_l0 = self.integrate(self.q_l, geometry.S_l()/n)/geometry.S_l()
-        q_t0 = self.integrate(self.q_t, geometry.S_t()/n)/geometry.S_t()
+        q_l0 = self.integrate(self.q_l, ds)/geometry.S_l()
+        q_t0 = self.integrate(self.q_t, ds)/geometry.S_t()
 
-        self.q_l += q_l0+q_t0
-        self.q_t += q_t0+q_l0
-        print(self.q_t[-1], self.q_l[0])
+        self.q_l += q_l0
+        self.q_t += q_t0
 
+        # extract the spar
+        
     def show(self):
-        x = np.array([self.x_t(p) for p in self.p_t ])
-        y = np.array([self.y_t(p) for p in self.p_t ])
-        plt.scatter(x,y,c=(self.q_t))
+        xt = np.array([self.x_t(p) for p in self.p_t ])
+        yt = np.array([self.y_t(p) for p in self.p_t ])
+        xl = np.array([self.x_l(p) for p in self.p_l ])-0.1
+        yl = np.array([self.y_l(p) for p in self.p_l ])
+
+        plt.scatter(xt,yt,c=np.abs(self.q_t))
+        plt.scatter(xl,yl,c=np.abs(self.q_l))
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -103,5 +108,5 @@ class section():
 
         return integral
 
-s = section(1000, 3000)
+s = section(0.001, 3000)
 s.show()
