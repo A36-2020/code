@@ -20,17 +20,16 @@ class section():
         self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/geometry.Inertia_l()
         self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/geometry.Inertia_t()
 
-        q_l0 = self.integrate(self.q_l, ds)/geometry.S_l()
-        q_t0 = self.integrate(self.q_t, ds)/geometry.S_t()
+        q_l0 = self.qs0_l()
+        q_t0 = self.qs0_t()
 
         self.q_l += q_l0
         self.q_t += q_t0
         print(q_t0, q_l0)
-        self.sc = (q_l0*V_l+q_t0*V_t)/V/V
 
         # extract the spar
         l_end_i = int(F100.h/ds)
-        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))/2
+        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))/1
         self.p_x = np.array([0 for _ in self.s])
         self.p_y = np.linspace(-F100.h/2,F100.h/2,self.s.shape[0])
 
@@ -40,6 +39,8 @@ class section():
         self.q_t = self.q_t[:-l_end_i]
         self.p_t = self.p_t[:-l_end_i]
 
+        print(self.s[0],self.s[-1],self.q_l[0],self.q_l[-1],self.q_t[0],self.q_t[-1])
+        input()
         
         
     def show(self):
@@ -52,7 +53,6 @@ class section():
         y = np.hstack((yt,yl,self.p_y))
         c = np.hstack((self.q_t, self.q_l, self.s))
 
-        plt.scatter(self.sc, 0)
         plt.scatter(x,y,c=(c))
         plt.colorbar()
         plt.axis('equal')
@@ -125,6 +125,27 @@ class section():
             s += ds
 
         return integral
+
+    def qs0_l(self):
+        t = lambda s: F100.tsp if s <= F100.h else F100.tsk
+
+        integral = 0.0
+        integral2 = 0.0
+        for i in range(self.q_l.shape[0]):
+            integral += self.d * self.q_l[i]/t(self.p_l[i])
+            integral2 += self.d/t(self.p_l[i])
+        return integral/integral2
+
+
+    def qs0_t(self):
+        t = lambda s: F100.tsk if s <= 2*geometry.l() else F100.tsp
+
+        integral = 0.0
+        integral2 = 0.0
+        for i in range(self.q_t.shape[0]):
+            integral += self.d * self.q_t[i]/t(self.p_t[i])
+            integral2 += self.d/t(self.p_t[i])
+        return integral/integral2
 
 s = section(0.001, 3000)
 s.show()
