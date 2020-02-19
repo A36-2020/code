@@ -72,6 +72,7 @@ areasum = sum(Area)
 zcentroidtotal = ztimesA/areasum
 ycentroidtotal = ytimesA/areasum
 
+print(z_centroid)
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
 
