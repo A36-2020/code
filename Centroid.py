@@ -11,18 +11,18 @@ angle = math.atan((0.5*h)/(Ca-0.5*h))
 stspace = (2*math.sqrt((0.5*h)**2+ (Ca-0.5*h)**2)+ math.pi*0.5*h)/11
 zcircfront = stspace*(0.5*h)/(0.5*math.pi*0.5*h)
 y_centroidcirc = math.sqrt((0.5*h)**2-((0.5*h)- zcircfront)**2) #this is for the stringers on the circular part
-z_centroidcirc = Ca-zcircfront
+z_centroidcirc = zcircfront
 
-z_centroidspar = Ca - 0.5*h
+z_centroidspar = 0.5*h
 y_centroidspar = 0
 
-z_centroidskinup = (Ca-0.5*h)/2
+z_centroidskinup = Ca- (Ca-0.5*h)/2
 y_centroidskinup = 0.25*h
 
-z_centroidskindown = (Ca-0.5*h)/2
+z_centroidskindown = Ca- (Ca-0.5*h)/2
 y_centroidskindown = -0.25*h
 
-z_centroid_semicirc = Ca - 0.5*h+ 4*0.5*h/(3*math.pi)
+z_centroid_semicirc = 0.5*h - 2*0.5*h/math.pi
 y_centroid_semicirc = 0
 
 y_centroid+=[y_centroidskinup, y_centroid_semicirc, y_centroidskindown, y_centroidspar]
@@ -41,7 +41,7 @@ def stringercentroids(y_centroid, z_centroid):
     for n in range(4):
         y_centroidpos = math.sin(angle)*(0.5*stspace+n*stspace)
         y_centroid.append(y_centroidpos)
-        z_centroidstraight = math.cos(angle)*(0.5*stspace+(n)*stspace)
+        z_centroidstraight = Ca- math.cos(angle)*(0.5*stspace+(n)*stspace)
         z_centroid.append(z_centroidstraight)
         
     z_centroid+=[z_centroidcirc, Ca, z_centroidcirc]
@@ -50,7 +50,7 @@ def stringercentroids(y_centroid, z_centroid):
     for n in range(4):
         y_centroidneg = math.sin(angle)*(0.5*stspace+(3-n)*stspace)
         y_centroid.append(-y_centroidneg)
-        z_centroidstraight = math.cos(angle)*(0.5*stspace+(3-n)*stspace)
+        z_centroidstraight = Ca- math.cos(angle)*(0.5*stspace+(3-n)*stspace)
         z_centroid.append(z_centroidstraight)
         
     return y_centroid, z_centroid
