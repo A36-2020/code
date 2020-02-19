@@ -25,7 +25,7 @@ def Moment_of_inertia():
     Izz_total+= Izz_stringer
     Iyy_total+= Iyy_stringer
 
-    return Izz_total, Iyy_total
+    return (Izz_total, Iyy_total)
 
 if  __name__ == '__main__':
     print(Moment_of_inertia())

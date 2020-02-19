@@ -1,6 +1,7 @@
 import numpy as np
 from math import *
 import F100
+import Moment_of_Inertia
 import geometry
 import material
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 class section():
     def __init__(self, ds, V, V_z, T):
         self.d = ds
-        I = geometry.Inertia_xx()
+        I = Moment_of_Inertia.Moment_of_inertia()[0]
         V_lt = geometry.S_al()/geometry.S_at()
         V_t = V/(1+V_lt)
         V_l = V_lt*V_t
