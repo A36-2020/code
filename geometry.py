@@ -1,6 +1,7 @@
 import F100
 import numpy as np
 from math import *
+from Moment_of_Inertia import *
 
 def Inertia_xx():
     ## Half circle in the front
@@ -22,7 +23,7 @@ def Inertia_xx():
     I_sk = l**3*t*sin(phi)**2/12
     I_par = l*t*(F100.h/4)**2
 
-    return I_c*t+I_s+2*(I_sk+I_par)
+    return #I_c*t+I_s+2*(I_sk+I_par)
 
 def Inertia_l():
     ## Half circle in the front
