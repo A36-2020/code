@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from matplotlib.patches import Wedge
 from F100 import *
 
 z_centroid= []
@@ -44,7 +45,7 @@ def stringercentroids(y_centroid, z_centroid):
         z_centroidstraight = Ca- math.cos(angle)*(0.5*stspace+(n)*stspace)
         z_centroid.append(z_centroidstraight)
         
-    z_centroid+=[z_centroidcirc, Ca, z_centroidcirc]
+    z_centroid+=[z_centroidcirc, 0, z_centroidcirc]
     y_centroid+=[y_centroidcirc, 0, -y_centroidcirc]
 
     for n in range(4):
@@ -73,4 +74,31 @@ ycentroidtotal = ytimesA/areasum
 
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
-    
+
+zup = [0.5*h,Ca]
+yup = [0.5*h,0]
+zdown = [0.5*h,Ca]
+ydown = [-0.5*h,0]
+zspar = [0.5*h,0.5*h]
+yspar = [0.5*h, -0.5*h]
+
+
+
+plt.scatter(zcentroidtotal, ycentroidtotal, label="Centroid", color= "blue", marker= "x", s=35)
+plt.scatter(z_centroid, y_centroid, label="Stiffeners", color = "orange", marker= "x", s=25)
+plt.scatter(z_centroid_semicirc, y_centroid_semicirc, label= "Semicircle", color= "green", marker= "x", s=30)
+plt.scatter(z_centroidspar, y_centroidspar, label= "Spar", color= "red", marker= "x", s=30)
+plt.scatter(z_centroidskinup, y_centroidskinup, label= "Skins", color= "purple", marker= "x", s=30)
+plt.scatter(z_centroidskindown, y_centroidskindown, color= "purple",  
+            marker= "x", s=30)
+plt.plot(zup,yup, color="black", linewidth=0.7)
+plt.plot(zdown,ydown, color="black", linewidth=0.7)
+plt.plot(zspar, yspar, color="black", linewidth=0.1)
+circle1 = Wedge((0.5*h,0), 0.5*h, 90, 270, color="black", fill = False)
+fig = plt.gcf()
+ax = fig.gca()
+ax.add_artist(circle1)
+fig.set_size_inches(8,3)
+
+plt.legend()
+plt.show()
