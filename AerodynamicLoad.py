@@ -48,5 +48,5 @@ for j in range (Nx):
 
 #Calculate resultant q and CoP for every aileron segment along x-axis (spanwise)
 #--------------------------------
-area, CoP = simpson(arr[0],z)
+area, CoP = simpson(arr[0],z,x)
 print(area,CoP)
