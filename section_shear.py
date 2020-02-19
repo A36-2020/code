@@ -13,15 +13,15 @@ class section():
         V_lt = geometry.S_al()/geometry.S_at()
         V_t = V/(1+V_lt)
         V_l = V_lt*V_t
-        V_t_z = V/(1+V_lt)
-        V_l_z = V_lt*V_t
+        V_t_z = V_z/(1+V_lt)
+        V_l_z = V_lt*V_t_z
         print(V_l, V_t, V_l + V_t, V)
 
         self.p_l = np.arange(0,geometry.S_l(),ds)
         self.p_t = np.arange(0,geometry.S_t(),ds)
 
-        self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/geometry.Inertia_l()+V_l_z*np.array([self.line_integral_l_z(x) for x in self.p_l])/geometry.Inertia_l()/2
-        self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/geometry.Inertia_t()+V_t_z*np.array([self.line_integral_t_z(x) for x in self.p_t])/geometry.Inertia_t()/2
+        self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/Moment_of_Inertia.Moment_of_Inertia_semicirc()[0]+V_l_z*np.array([self.line_integral_l_z(x) for x in self.p_l])/Moment_of_Inertia.Moment_of_Inertia_semicirc()[1]
+        self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/Moment_of_Inertia.Moment_of_Inertia_triangle()[1]+V_t_z*np.array([self.line_integral_t_z(x) for x in self.p_t])/Moment_of_Inertia.Moment_of_Inertia_triangle()[1]
 
         q_l0 = self.qs0_l()
         q_t0 = self.qs0_t()
@@ -42,7 +42,7 @@ class section():
 
         # extract the spar
         l_end_i = int(F100.h/ds)
-        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))
+        self.s = -1*(self.q_l[:l_end_i]-(self.q_t[-l_end_i:]))
 
         self.p_x = np.array([0 for _ in self.s])
         self.p_y = np.linspace(-F100.h/2,F100.h/2,self.s.shape[0])
@@ -54,6 +54,7 @@ class section():
         self.p_t = self.p_t[:-l_end_i]
 
         print(self.s[0],self.s[-1],self.q_l[0],self.q_l[-1],self.q_t[0],self.q_t[-1])
+        input()
         
         
     def show(self):
@@ -184,5 +185,5 @@ class section():
             integral2 += self.d/t(self.p_t[i])
         return integral/integral2
 
-s = section(0.01, 3000,-1000, -100)
+s = section(0.001, 000,3000, 00)
 s.show()
