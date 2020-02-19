@@ -6,7 +6,7 @@ import material
 import matplotlib.pyplot as plt
 
 class section():
-    def __init__(self, ds, V):
+    def __init__(self, ds, V, T):
         self.d = ds
         I = geometry.Inertia_xx()
         V_lt = geometry.S_al()/geometry.S_at()
@@ -25,11 +25,22 @@ class section():
 
         self.q_l += q_l0
         self.q_t += q_t0
-        print(q_t0, q_l0)
+
+        #DO the tourqe
+        T_l_t = geometry.S_at()*geometry.A_l()**2/geometry.S_al()/geometry.A_t()**2
+
+        T_t = T/(1+T_l_t)
+        T_l = T_l_t*T_t
+
+        self.q_t += T_t/2/geometry.A_t()
+        self.q_l += T_l/2/geometry.A_t()
+
+
 
         # extract the spar
         l_end_i = int(F100.h/ds)
-        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))/1
+        self.s = -1*(self.q_l[:l_end_i]-np.flip(self.q_t[-l_end_i:]))
+
         self.p_x = np.array([0 for _ in self.s])
         self.p_y = np.linspace(-F100.h/2,F100.h/2,self.s.shape[0])
 
@@ -40,7 +51,6 @@ class section():
         self.p_t = self.p_t[:-l_end_i]
 
         print(self.s[0],self.s[-1],self.q_l[0],self.q_l[-1],self.q_t[0],self.q_t[-1])
-        input()
         
         
     def show(self):
@@ -53,7 +63,8 @@ class section():
         y = np.hstack((yt,yl,self.p_y))
         c = np.hstack((self.q_t, self.q_l, self.s))
 
-        plt.scatter(x,y,c=(c))
+        m = max(np.abs(c))
+        plt.scatter(x,y,c=(c), cmap="seismic", vmin=-m, vmax=m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -147,5 +158,5 @@ class section():
             integral2 += self.d/t(self.p_t[i])
         return integral/integral2
 
-s = section(0.001, 3000)
+s = section(0.001, 55000, -10000)
 s.show()

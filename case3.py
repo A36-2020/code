@@ -34,7 +34,7 @@ def case3(x_vals, M_1):
     moment = np.array(moment)
 
     # from internal moment we can do angle of twist and shear flow
-    S_l = F100.h/F100.tsp+pi*F100.h/F100.tsk
+    S_l = F100.h/F100.tsp+pi*F100.h/F100.tsk/2
     S_t = F100.h/F100.tsp+2*sqrt(F100.h**2/4+(F100.Ca-F100.h/2)**2)/F100.tsk
     T_l_t = S_t*A_l()**2/S_l/A_t()**2
 

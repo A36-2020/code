@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 
 import F100
 import material
+import geometry
 
 def deformation(x_vals, Inertia):
+    Inertia = geometry.Inertia_xx()
     """ x is a numpy array, returns deflection due to flex on every x as np.array
         as well as the Moment times stifness and shear force on every position
         also returns F1y, F2y, F3y"""
