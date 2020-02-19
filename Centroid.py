@@ -44,7 +44,7 @@ def stringercentroids(y_centroid, z_centroid):
         z_centroidstraight = Ca- math.cos(angle)*(0.5*stspace+(n)*stspace)
         z_centroid.append(z_centroidstraight)
         
-    z_centroid+=[z_centroidcirc, Ca, z_centroidcirc]
+    z_centroid+=[z_centroidcirc, 0, z_centroidcirc]
     y_centroid+=[y_centroidcirc, 0, -y_centroidcirc]
 
     for n in range(4):
@@ -71,6 +71,7 @@ areasum = sum(Area)
 zcentroidtotal = ztimesA/areasum
 ycentroidtotal = ytimesA/areasum
 
+print(z_centroid)
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
     
