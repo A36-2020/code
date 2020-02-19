@@ -25,7 +25,6 @@ for line in text:
 ar = np.array(lst)
 arr = ar.astype(np.float)
 
-
 # connect with correct position
 #-------------------------------
 z = np.zeros(Nz)
@@ -48,5 +47,4 @@ for j in range (Nx):
 
 #Calculate resultant q and CoP for every aileron segment along x-axis (spanwise)
 #--------------------------------
-area, CoP = simpson(arr[0],z)
-print(area,CoP)
+area, CoP = simpson(arr,z,x)
