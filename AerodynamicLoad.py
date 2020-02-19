@@ -47,4 +47,9 @@ for j in range (Nx):
 
 #Calculate resultant q and CoP for every aileron segment along x-axis (spanwise)
 #--------------------------------
+<<<<<<< HEAD
 area, CoP = simpson(arr,z,x)
+=======
+area, CoP = simpson(arr[0],z,x)
+print(area,CoP)
+>>>>>>> wieger
