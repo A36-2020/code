@@ -6,19 +6,21 @@ import material
 import matplotlib.pyplot as plt
 
 class section():
-    def __init__(self, ds, V, T):
+    def __init__(self, ds, V, V_z, T):
         self.d = ds
         I = geometry.Inertia_xx()
         V_lt = geometry.S_al()/geometry.S_at()
         V_t = V/(1+V_lt)
         V_l = V_lt*V_t
+        V_t_z = V/(1+V_lt)
+        V_l_z = V_lt*V_t
         print(V_l, V_t, V_l + V_t, V)
 
         self.p_l = np.arange(0,geometry.S_l(),ds)
         self.p_t = np.arange(0,geometry.S_t(),ds)
 
-        self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/geometry.Inertia_l()
-        self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/geometry.Inertia_t()
+        self.q_l = V_l*np.array([self.line_integral_l(x) for x in self.p_l])/geometry.Inertia_l()+V_l_z*np.array([self.line_integral_l_z(x) for x in self.p_l])/geometry.Inertia_l()/2
+        self.q_t = V_t*np.array([self.line_integral_t(x) for x in self.p_t])/geometry.Inertia_t()+V_t_z*np.array([self.line_integral_t_z(x) for x in self.p_t])/geometry.Inertia_t()/2
 
         q_l0 = self.qs0_l()
         q_t0 = self.qs0_t()
@@ -33,7 +35,7 @@ class section():
         T_l = T_l_t*T_t
 
         self.q_t += T_t/2/geometry.A_t()
-        self.q_l += T_l/2/geometry.A_t()
+        self.q_l += T_l/2/geometry.A_l()
 
 
 
@@ -64,7 +66,7 @@ class section():
         c = np.hstack((self.q_t, self.q_l, self.s))
 
         m = max(np.abs(c))
-        plt.scatter(x,y,c=(c), cmap="seismic", vmin=-m, vmax=m)
+        plt.scatter(x,y,c=(c))#, vmin=-m, vmax=m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -114,6 +116,18 @@ class section():
 
         return integral
 
+    def line_integral_l_z(self, end, ds=0.0001):
+        t = lambda s: F100.tsp if s <= F100.h else F100.tsk
+
+
+        integral = 0.0
+        s = 0.0
+        while s < end:
+            integral += ds*t(s)*self.x_l(s)
+            s += ds
+
+        return integral
+
     def y_t(self, s):
         if s <= geometry.l():
             return -F100.h/2+s*(F100.h/2/geometry.l())
@@ -133,6 +147,17 @@ class section():
         s = 0.0
         while s < end:
             integral += ds*t(s)*self.y_t(s)
+            s += ds
+
+        return integral
+
+    def line_integral_t_z(self, end, ds=0.0001):
+        t = lambda s: F100.tsk if s <= 2*geometry.l() else F100.tsp
+            
+        integral = 0.0
+        s = 0.0
+        while s < end:
+            integral += ds*t(s)*self.x_t(s)
             s += ds
 
         return integral
@@ -158,5 +183,5 @@ class section():
             integral2 += self.d/t(self.p_t[i])
         return integral/integral2
 
-s = section(0.001, 55000, -10000)
+s = section(0.01, 3000,-1000, -100)
 s.show()
