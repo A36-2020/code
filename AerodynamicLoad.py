@@ -79,6 +79,7 @@ def simpson(F,z,x):
         CoP.append(int_fz/int_f)
     return Q,CoP
 
+area,CoP = simpson(arr,z,x)
 
 #Interpolate aerodynamic load over x-axis with n points
 #output array sample:
