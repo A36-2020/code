@@ -144,10 +144,10 @@ def moments_around_z(q,qx, x):
         qvalue  = q[i]
         qxvalue = qx[i]
         momentsum = momentsum + qvalue * (qxvalue-x)
-    return momentsum
+    return float(momentsum)
 
 
-momentsum = moments_around_z(Qthingy, x[0], 0)
+momentsum = moments_around_z(Qthingy, CoP, -Ca)
 #print(momentsum)
 
 
@@ -170,6 +170,25 @@ def bigmatrix(x1,x2,x3,xa,ca,ha):
     bm[2][3] = ha / 2
     bm[2][4] = ha / 2
     bm[2][5] = ha / 2
+    bm[2][6] = m.cos(m.pi/6)*ha - m.sin(m.pi/6)*ca
+    #Row 4
+    bm[3][3] = x1
+    bm[3][4] = x2
+    bm[3][5] = x3
+    bm[3][6] = m.cos(m.pi/6)*(x2-xa/2)
+    #Row 5
+    bm[4][0] = x1
+    bm[4][1] = x2
+    bm[4][2] = x3
+    bm[4][6] = m.sin(m.pi / 6) * (x2 - xa / 2)
+    #Row 6
+    bm[5][6] = x1
+    bm[5][7] = 1
+
+    #Row 7
+    bm[6][0] = (x2-x1)**3
+
+
 
     print(bm)
 
