@@ -28,10 +28,10 @@ arr = ar.astype(np.float)
 
 # connect with correct position
 #-------------------------------
-z = np.zeros((80,1))
-x = np.zeros((1,40))
+z = np.zeros((Nz,1))
+x = np.zeros((1,Nx))
 
-for i in range (80):
+for i in range (Nz):
     thetaz = (i/Nz)*m.pi
     thetaz2 = ((i+1)/Nz)*m.pi
 
@@ -39,7 +39,7 @@ for i in range (80):
     z[i,0] = zPos
 
 
-for j in range (40):
+for j in range (Nx):
     thetax = (j/Nx)*m.pi
     thetax2 = ((j+1)/Nx)*m.pi
 
@@ -51,22 +51,20 @@ for j in range (40):
 
 
 # Integrating aerodynamic load along z-axis and calculating center of pressure
+#Returns q integration for every x-axis segment
 # simpson integration method
 def simpson(F,z,x):
     F = -1*F
     a = z[0]
     b = z[-1]
-    nz = len(z)
-    nx = len(x)
     CoP = []
     Q = []
     dz = abs(float((b-a)/2))
-    print(F.shape)
-    print(F[0,:])
-    for i in np.arange(nx):
+    for i in np.arange(Nx):
+        print(i)
         q = []
         cop = []
-        for j in np.arange(nz):
+        for j in np.arange(Nz):
             if j % 2 != 0:
                 q.append(4*F[j,i])
                 cop.append(4*(F[j,i]*z[j]))
@@ -79,7 +77,7 @@ def simpson(F,z,x):
         CoP.append(int_fz/int_f)
     return Q,CoP
 
-area,CoP = simpson(arr,z,x)
+Q,CoP = simpson(arr,z,x)
 
 #Interpolate aerodynamic load over x-axis with n points
 #output array sample:
@@ -149,8 +147,8 @@ def interpolation_over_span(x, q, qz, spanlength):
     return qlist, qzlist
 
 a,b = interpolation_over_span(x,q,qz,spanlength)
-print(a)
-print(b)
+# print(a)
+# print(b)
 
 
 r1x = 0.2
@@ -159,4 +157,4 @@ r3x = 0.6
 E = 1000
 I = 1.2
 
-def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
+# def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
