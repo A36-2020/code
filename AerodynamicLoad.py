@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math as m
 from mpl_toolkits import mplot3d
+from F100 import *
 
 # values
 #-------------------------------
@@ -61,7 +62,6 @@ def simpson(F,z,x):
     Q = []
     dz = abs(float((b-a)/2))
     for i in np.arange(Nx):
-        print(i)
         q = []
         cop = []
         for j in np.arange(Nz):
@@ -75,80 +75,80 @@ def simpson(F,z,x):
         int_fz= (F[0,i]*a+sum(cop)+F[-1,i]*b)*dz/3
         Q.append(int_f)
         CoP.append(int_fz/int_f)
-    return Q,CoP
+    return np.asarray(Q),np.asarray(CoP)
 
 Q,CoP = simpson(arr,z,x)
 
-#Interpolate aerodynamic load over x-axis with n points
-#output array sample:
-q = [1,2,5,4,2,3]
-qz = [0.2,0.2,0.4,0.6,0.2,0.5]
-
-x = [0.25,0.5,0.75,1]
-x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-spanlength = 12
-
-def interpolation_over_span(x, q, qz, spanlength):
-    oringinal_interval_len = spanlength/len(q)
-    new_interval_len = spanlength/len(x)
-    qlist = []
-    qzlist = []
-    for i in x:
-        xcoord  = i*spanlength
-        lower_than_x = []
-        lower_than_x_qz = []
-        higher_than_x = []
-        higher_than_x_qz = []
-        fractionfound = False
-        for j in range(len(q)):
-            qcoord = j/len(q)*spanlength
-            if qcoord < xcoord:
-                lower_than_x.append(q[j])
-                lower_than_x_qz.append(qz[j])
-            if qcoord > xcoord:
-                if fractionfound == False:
-                    fraction = qcoord/xcoord - 1
-                    fractionfound = True
-                higher_than_x.append(q[j])
-                higher_than_x_qz.append(qz[j])
-
-        lower_qz = qz[0]
-        upper_qz = qz[-1]
-        lower_q = q[0]
-        upper_q = q[-1]
-
-        #print(xcoord)
-
-        if len(lower_than_x) > 0:
-            lower_qz = lower_than_x_qz[-1]
-            lower_q = lower_than_x[-1]
-        if len(higher_than_x) > 0:
-            upper_qz = higher_than_x_qz[0]
-            upper_q = higher_than_x[0]
-
-        #print(lower_qz)
-        #print(upper_qz)
-        #print(lower_q)
-        #print(upper_q)
-        #print(fraction)
-        #print("")
-
-        interpolated_q = (lower_q+(upper_q-lower_q)*fraction) * new_interval_len/oringinal_interval_len
-        interpolated_qz = lower_qz +(upper_qz-lower_qz)*fraction
-
-        #print("Interpolated values q & qz:")
-        #print(interpolated_q)
-        #print(interpolated_qz)
-        #print("")
-        #print("")
-
-        qlist.append(interpolated_q)
-        qzlist.append(interpolated_qz)
-    return qlist, qzlist
-
-a,b = interpolation_over_span(x,q,qz,spanlength)
-# print(a)
-# print(b)
+# #Interpolate aerodynamic load over x-axis with n points
+# #output array sample:
+# q = [1,2,5,4,2,3]
+# qz = [0.2,0.2,0.4,0.6,0.2,0.5]
+#
+# x = [0.25,0.5,0.75,1]
+# x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
+# spanlength = 12
+#
+# def interpolation_over_span(x, q, qz, spanlength):
+#     oringinal_interval_len = spanlength/len(q)
+#     new_interval_len = spanlength/len(x)
+#     qlist = []
+#     qzlist = []
+#     for i in x:
+#         xcoord  = i*spanlength
+#         lower_than_x = []
+#         lower_than_x_qz = []
+#         higher_than_x = []
+#         higher_than_x_qz = []
+#         fractionfound = False
+#         for j in range(len(q)):
+#             qcoord = j/len(q)*spanlength
+#             if qcoord < xcoord:
+#                 lower_than_x.append(q[j])
+#                 lower_than_x_qz.append(qz[j])
+#             if qcoord > xcoord:
+#                 if fractionfound == False:
+#                     fraction = qcoord/xcoord - 1
+#                     fractionfound = True
+#                 higher_than_x.append(q[j])
+#                 higher_than_x_qz.append(qz[j])
+#
+#         lower_qz = qz[0]
+#         upper_qz = qz[-1]
+#         lower_q = q[0]
+#         upper_q = q[-1]
+#
+#         #print(xcoord)
+#
+#         if len(lower_than_x) > 0:
+#             lower_qz = lower_than_x_qz[-1]
+#             lower_q = lower_than_x[-1]
+#         if len(higher_than_x) > 0:
+#             upper_qz = higher_than_x_qz[0]
+#             upper_q = higher_than_x[0]
+#
+#         #print(lower_qz)
+#         #print(upper_qz)
+#         #print(lower_q)
+#         #print(upper_q)
+#         #print(fraction)
+#         #print("")
+#
+#         interpolated_q = (lower_q+(upper_q-lower_q)*fraction) * new_interval_len/oringinal_interval_len
+#         interpolated_qz = lower_qz +(upper_qz-lower_qz)*fraction
+#
+#         #print("Interpolated values q & qz:")
+#         #print(interpolated_q)
+#         #print(interpolated_qz)
+#         #print("")
+#         #print("")
+#
+#         qlist.append(interpolated_q)
+#         qzlist.append(interpolated_qz)
+#     return qlist, qzlist
+#
+# a,b = interpolation_over_span(x,q,qz,spanlength)
+# # print(a)
+# # print(b)
 
 
 r1x = 0.2
@@ -157,4 +157,28 @@ r3x = 0.6
 E = 1000
 I = 1.2
 
-# def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
+def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,Q,spanlength,E,I):
+
+#Q contribution to displacement Macaulay Moment Equations
+def(Mz_Q)
+    mask_x1 = (x[0]<x1)
+    mask_x2 = (x[0]<x2)
+    mask_x3 = (x[0]<x3)
+
+    Q_x1 = Q[mask_x1]
+    Q_x2 = Q[mask_x2]
+    Q_x3 = Q[mask_x3]
+
+    x_x1 = x[0][mask_x1]
+    x_x2 = x[0][mask_x2]
+    x_x3 = x[0][mask_x3]
+
+    Mz_Q_x1 = Q_x1*x_x1
+    Mz_Q_x2 = Q_x2*x_x2
+    Mz_Q_x3 = Q_x3*x_x3
+
+    return Mz_Q_x1, Mz_Q_x2, Mz_Q_x3
+
+#Right part of Matrix
+def (BM_right):
+    A = np.matrix([[P*sin(30./180*pi)+sum(Q)],[P*cos(30./180*pi)],[])
