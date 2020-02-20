@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from F100 import *
+from matplotlib.patches import Wedge
 
 z_centroid= []
 y_centroid= []
@@ -97,4 +98,32 @@ if __name__ == '__main__':
     print(y_centroids_straight)
     print(z_centroids_semicirc)
     print(y_centroids_semicirc)
+
+##Drawing/plotting the centroids
+
+zup = [0.5*h,Ca]
+yup = [0.5*h,0]
+zdown = [0.5*h,Ca]
+ydown = [-0.5*h,0]
+zspar = [0.5*h,0.5*h]
+yspar = [0.5*h, -0.5*h]
+
+plt.scatter(zcentroidtotal, ycentroidtotal, label="Centroid", color= "blue", marker= "x", s=35)
+plt.scatter(z_centroid, y_centroid, label="Stiffeners", color = "orange", marker= "x", s=25)
+plt.scatter(z_centroid_semicirc, y_centroid_semicirc, label= "Semicircle", color= "green", marker= "x", s=30)
+plt.scatter(z_centroidspar, y_centroidspar, label= "Spar", color= "red", marker= "x", s=30)
+plt.scatter(z_centroidskinup, y_centroidskinup, label= "Skins", color= "purple", marker= "x", s=30)
+plt.scatter(z_centroidskindown, y_centroidskindown, color= "purple",  
+            marker= "x", s=30)
+plt.plot(zup,yup, color="black", linewidth=0.7)
+plt.plot(zdown,ydown, color="black", linewidth=0.7)
+plt.plot(zspar, yspar, color="black", linewidth=0.1)
+circle1 = Wedge((0.5*h,0), 0.5*h, 90, 270, color="black", fill = False)
+fig = plt.gcf()
+ax = fig.gca()
+ax.add_artist(circle1)
+fig.set_size_inches(8,3)
+
+plt.legend()
+plt.show()
     
