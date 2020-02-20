@@ -76,16 +76,12 @@ def simpson(F,z,x):
         CoP.append(int_fz/int_f)
     return Q,CoP
 
-
-#Interpolate aerodynamic load over x-axis with n points
-#output array sample:
-#q = [1,2,5,4,2,3]
-#qz = [0.2,0.2,0.4,0.6,0.2,0.5]
-#xlist = [0.1,0.2,0.4,0.6,0.8,1]
-#x = [0.25,0.5,0.75,1]
-
-
 def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
+    #This function interpolates the values for Q and the z-coord of q on a list of xcoords.
+    #These coords can range from 0-1, and have to be given in list form.
+    #The values for Q are also scaled; meaning that if more points are supplied, the distributed load is discretised
+    #in more smaller point loads.
+
     oringinal_interval_len = spanlength/len(q)
     new_interval_len = spanlength/len(x_to_interpolate)
     qlist = []
@@ -98,7 +94,6 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         higher_than_x_qz = []
         fractionfound = False
         lower_qcoord = 0
-        upper_qcoord = spanlength
         for j in range(len(q)):
             qcoord = xcoord_list[0][j]
             if qcoord <= xcoord:
@@ -108,9 +103,7 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
             if qcoord > xcoord:
                 if fractionfound == False:
                     fraction = (xcoord-lower_qcoord)/(qcoord-lower_qcoord)
-                    upper_qcoord = qcoord
                     fractionfound = True
-
                 higher_than_x.append(q[j])
                 higher_than_x_qz.append(qz[j])
 
@@ -119,8 +112,6 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         lower_q = q[0]
         upper_q = q[-1]
 
-        #print(xcoord)
-
         if len(lower_than_x) >= 0:
             lower_qz = lower_than_x_qz[-1]
             lower_q = lower_than_x[-1]
@@ -128,24 +119,8 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
             upper_qz = higher_than_x_qz[0]
             upper_q = higher_than_x[0]
 
-        #print(lower_qz)
-        #print(upper_qz)
-        #print(lower_q)
-        #print(upper_q)
-        #print(fraction)
-        #print("")
-
         interpolated_q = (lower_q+(upper_q-lower_q)*fraction) * new_interval_len/oringinal_interval_len
         interpolated_qz = lower_qz +(upper_qz-lower_qz)*fraction
-
-        #print("Interpolated values q & qz:")
-        #print(interpolated_q)
-        #print(interpolated_qz)
-        #print("")
-        #print("")
-        print(lower_qcoord,xcoord,upper_qcoord)
-        print(lower_q,interpolated_q,upper_q,fraction)
-        print("")
 
         qlist.append(interpolated_q)
         qzlist.append(interpolated_qz)
@@ -163,5 +138,40 @@ scaled_interpolated_xlist = []
 for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
 
+def moments_around_z(q,qx, x):
+    momentsum = 0 #[Nm]
+    for i in range(len(qx)):
+        qvalue  = q[i]
+        qxvalue = qx[i]
+        momentsum = momentsum + qvalue * (qxvalue-x)
+    return momentsum
 
-# def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
+
+momentsum = moments_around_z(Qthingy, x[0], 0)
+#print(momentsum)
+
+
+def bigmatrix(x1,x2,x3,xa,ca,ha):
+    bm = np.zeros((11,11))
+    #Row 1:
+    bm[0][0] = 1
+    bm[0][1] = 1
+    bm[0][2] = 1
+    bm[0][6] = m.sin(m.pi/6)
+    #Row 2:
+    bm[1][3] = 1
+    bm[1][4] = 1
+    bm[1][5] = 1
+    bm[1][6] = m.cos(m.pi/6)
+    #Row 3
+    bm[2][0] = -ca
+    bm[2][1] = -ca
+    bm[2][2] = -ca
+    bm[2][3] = ha / 2
+    bm[2][4] = ha / 2
+    bm[2][5] = ha / 2
+
+    print(bm)
+
+
+bigmatrix(1,2,3,4,Ca,la)
