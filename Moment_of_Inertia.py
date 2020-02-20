@@ -27,6 +27,8 @@ def Moment_of_inertia():
 
     return Izz_total, Iyy_total
 
+Izz_total, Iyy_total= Moment_of_inertia()
+
 def Moment_of_Inertia_triangle():
     Izz_skin_t = 2*((tsk * (areaskin/tsk)**3*math.sin(angle)**2)/12 + areaskin*(y_centroids_straight[0])**2) #for total straight skin
     Iyy_skin_t = 2 * ((tsk * (areaskin / tsk) ** 3 * math.cos(angle) ** 2) / 12 + areaskin * (z_centroids_straight[0]-0.5*h)**2)  # for total straight skin

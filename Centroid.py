@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from F100 import *
 from matplotlib.patches import Wedge
+from mainF100 import *
 
 z_centroid= []
 y_centroid= []
@@ -15,8 +16,8 @@ y_centroids_semicirc= []
 
 Area=[]
 
-angle = math.atan((0.5*h)/(Ca-0.5*h))
-stspace = (2*math.sqrt((0.5*h)**2+ (Ca-0.5*h)**2)+ math.pi*0.5*h)/11
+angle = math.atan((0.5*h)/(Ca-(0.5*h)))
+stspace = (2*math.sqrt(((0.5*h)**2) + ((Ca-0.5*h)**2))+ math.pi*0.5*h)/11
 zcircfront = stspace*(0.5*h)/(0.5*math.pi*0.5*h)
 y_centroidcirc = math.sqrt((0.5*h)**2-((0.5*h)- zcircfront)**2) #this is for the stringers on the circular part
 z_centroidcirc = zcircfront
@@ -123,7 +124,17 @@ fig = plt.gcf()
 ax = fig.gca()
 ax.add_artist(circle1)
 fig.set_size_inches(8,3)
+ax.set_ylabel('y (m)')
+ax.set_xlabel('-z (m)')
+ax.set_title('Cross-section centroids')
 
 plt.legend()
 plt.show()
+
+##Testing
+
+centroiddiff = zcentroidtotal+crosssection.zc
+centroiddiffperc = centroiddiff/crosssection.zc * 100
+print(centroiddiff, centroiddiffperc)
+
     
