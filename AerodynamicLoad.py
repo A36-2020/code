@@ -46,7 +46,6 @@ for j in range (Nx):
     xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
     x[0,j] = xPos
 
-# plot surface
 #---------------------------------------
 
 
@@ -61,7 +60,7 @@ def simpson(F,z,x):
     Q = []
     dz = abs(float((b-a)/2))
     for i in np.arange(Nx):
-        print(i)
+        #print(i)
         q = []
         cop = []
         for j in np.arange(Nz):
@@ -77,38 +76,41 @@ def simpson(F,z,x):
         CoP.append(int_fz/int_f)
     return Q,CoP
 
-Q,CoP = simpson(arr,z,x)
 
 #Interpolate aerodynamic load over x-axis with n points
 #output array sample:
-q = [1,2,5,4,2,3]
-qz = [0.2,0.2,0.4,0.6,0.2,0.5]
-xlist = [0.1,0.2,0.4,0.6,0.8,1]
-x = [0.25,0.5,0.75,1]
-x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-spanlength = 12
+#q = [1,2,5,4,2,3]
+#qz = [0.2,0.2,0.4,0.6,0.2,0.5]
+#xlist = [0.1,0.2,0.4,0.6,0.8,1]
+#x = [0.25,0.5,0.75,1]
 
-def interpolation_over_span(x, q, qz, spanlength):
+
+def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
     oringinal_interval_len = spanlength/len(q)
-    new_interval_len = spanlength/len(x)
+    new_interval_len = spanlength/len(x_to_interpolate)
     qlist = []
     qzlist = []
-    for i in x:
+    for i in x_to_interpolate:
         xcoord  = i*spanlength
         lower_than_x = []
         lower_than_x_qz = []
         higher_than_x = []
         higher_than_x_qz = []
         fractionfound = False
+        lower_qcoord = 0
+        upper_qcoord = spanlength
         for j in range(len(q)):
-            qcoord = j/len(q)*spanlength
-            if qcoord < xcoord:
+            qcoord = xcoord_list[0][j]
+            if qcoord <= xcoord:
                 lower_than_x.append(q[j])
                 lower_than_x_qz.append(qz[j])
+                lower_qcoord = qcoord
             if qcoord > xcoord:
                 if fractionfound == False:
-                    fraction = qcoord/xcoord - 1
+                    fraction = (xcoord-lower_qcoord)/(qcoord-lower_qcoord)
+                    upper_qcoord = qcoord
                     fractionfound = True
+
                 higher_than_x.append(q[j])
                 higher_than_x_qz.append(qz[j])
 
@@ -119,7 +121,7 @@ def interpolation_over_span(x, q, qz, spanlength):
 
         #print(xcoord)
 
-        if len(lower_than_x) > 0:
+        if len(lower_than_x) >= 0:
             lower_qz = lower_than_x_qz[-1]
             lower_q = lower_than_x[-1]
         if len(higher_than_x) > 0:
@@ -141,23 +143,25 @@ def interpolation_over_span(x, q, qz, spanlength):
         #print(interpolated_qz)
         #print("")
         #print("")
+        print(lower_qcoord,xcoord,upper_qcoord)
+        print(lower_q,interpolated_q,upper_q,fraction)
+        print("")
 
         qlist.append(interpolated_q)
         qzlist.append(interpolated_qz)
     return qlist, qzlist
 
-a,b = interpolation_over_span(x,q,qz,spanlength)
-# print(a)
-# print(b)
 
-plt.plot(q,xlist)
-plt.scatter(a,x)
-plt.show()
+interpolated_xlist = np.linspace(0,1,400)
+interpolated_xlist = interpolated_xlist[1:]
 
-r1x = 0.2
-r2x = 0.4
-r3x = 0.6
-E = 1000
-I = 1.2
+
+Qthingy,CoP = simpson(arr,z,x)
+a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
+
+scaled_interpolated_xlist = []
+for i in interpolated_xlist:
+    scaled_interpolated_xlist.append(i*la)
+
 
 # def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
