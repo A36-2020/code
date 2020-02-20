@@ -54,7 +54,7 @@ for j in range (40):
 #output array sample:
 q = [1,2,5,4,2,3]
 qz = [0.2,0.2,0.4,0.6,0.2,0.5]
-
+xlist = [0.1,0.2,0.4,0.6,0.8,1]
 x = [0.25,0.5,0.75,1]
 x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 spanlength = 12
@@ -121,6 +121,9 @@ a,b = interpolation_over_span(x,q,qz,spanlength)
 print(a)
 print(b)
 
+plt.plot(q,xlist)
+plt.scatter(a,x)
+plt.show()
 
 r1x = 0.2
 r2x = 0.4
@@ -128,7 +131,7 @@ r3x = 0.6
 E = 1000
 I = 1.2
 
-def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
+#def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,qlist,spanlength,E,I):
 
 
 
