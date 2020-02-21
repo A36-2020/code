@@ -112,7 +112,7 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         lower_q = q[0]
         upper_q = q[-1]
 
-        if len(lower_than_x) >= 0:
+        if len(lower_than_x) > 0:
             lower_qz = lower_than_x_qz[-1]
             lower_q = lower_than_x[-1]
         if len(higher_than_x) > 0:
@@ -192,5 +192,49 @@ def bigmatrix(x1,x2,x3,xa,ca,ha):
 
     print(bm)
 
+def shear_force_calculations(R1,R1x,R2,R2x,R3,R3x,A,Ax,Qvalues,la,xsteps):
+    interpolated_xlist=np.linspace(0,la,xsteps)
 
-bigmatrix(1,2,3,4,Ca,la)
+    shear_due_to_aero, b = interpolation_over_span(interpolated_xlist, x, Qvalues, CoP, la)
+
+    shearvalues = [0]
+    R1added = False
+    R2added = False
+    R3added = False
+    Aadded = False
+    for i in range(len(interpolated_xlist)):
+        localshear = shearvalues[-1] + shear_due_to_aero[i]
+
+        if interpolated_xlist[i]>R1x and R1added == False:
+            R1added = True
+            localshear = localshear+R1
+        if interpolated_xlist[i]>R2x and R2added == False:
+            R2added = True
+            localshear = localshear+R2
+        if interpolated_xlist[i]>R3x and R3added == False:
+            R3added = True
+            localshear = localshear+R3
+        if interpolated_xlist[i]>Ax and Aadded == False:
+            Aadded = True
+            localshear = localshear+A
+
+        shearvalues.append(localshear)
+    shearvalues = shearvalues[1:]
+    return shearvalues,interpolated_xlist
+
+def internal_moment_calculations(shear, shear_x):
+    internal_moment_list = [0]
+    xdelta = shear_x[1] - shear_x[0]
+    for i in range(len(shear_x)):
+        internal_moment = internal_moment_list[-1] + shear[i]*xdelta
+        internal_moment_list.append(internal_moment)
+    internal_moment_list = internal_moment_list[1:]
+    return internal_moment_list
+
+
+
+shear,shear_x = shear_force_calculations(1000,0.1,1000,0.4,1000,0.8,100,0.5,Qthingy,la,2000)
+internal_moments = internal_moment_calculations(shear,shear_x)
+
+plt.plot(shear_x,internal_moments)
+plt.show()
