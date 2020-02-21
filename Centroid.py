@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from F100 import *
 from matplotlib.patches import Wedge
-from mainF100 import *
+#from mainF100 import *
 
 z_centroid= []
 y_centroid= []
@@ -18,9 +18,13 @@ Area=[]
 
 angle = math.atan((0.5*h)/(Ca-(0.5*h)))
 stspace = (2*math.sqrt(((0.5*h)**2) + ((Ca-0.5*h)**2))+ math.pi*0.5*h)/11
-zcircfront = stspace*(0.5*h)/(0.5*math.pi*0.5*h)
-y_centroidcirc = math.sqrt((0.5*h)**2-((0.5*h)- zcircfront)**2) #this is for the stringers on the circular part
-z_centroidcirc = zcircfront
+
+t=360*stspace/(math.pi*0.5*h)
+c=0.5*h*math.sin(math.radians(t/2))
+z_centroidcirc=0.5*h-(math.sqrt((0.5*h)**2-c**2))
+y_centroidcirc = math.sqrt((0.5*h)**2-((0.5*h)- z_centroidcirc)**2) #this is for the stringers on the circular part
+
+
 
 z_centroidspar = 0.5*h
 y_centroidspar = 0
@@ -92,13 +96,13 @@ zcentroidtotal = ztimesA/areasum
 ycentroidtotal = ytimesA/areasum
 
 
-print(z_centroid)
+
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
-    print(z_centroids_straight)
-    print(y_centroids_straight)
-    print(z_centroids_semicirc)
-    print(y_centroids_semicirc)
+    #print(z_centroids_straight)
+    #print(y_centroids_straight)
+    #print(z_centroids_semicirc)
+    #print(y_centroids_semicirc)
 
 ##Drawing/plotting the centroids
 
@@ -133,8 +137,8 @@ plt.show()
 
 ##Testing
 
-centroiddiff = zcentroidtotal+crosssection.zc
-centroiddiffperc = centroiddiff/crosssection.zc * 100
-print(centroiddiff, centroiddiffperc)
+#centroiddiff = zcentroidtotal+crosssection.zc
+#centroiddiffperc = centroiddiff/crosssection.zc * 100
+#print(centroiddiff, centroiddiffperc)
 
     

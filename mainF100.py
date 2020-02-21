@@ -52,6 +52,8 @@ _ = crosssection.Izz                # moment of inertia about z-axis
 print(crosssection.zc)
 print(crosssection.Izz)
 print(crosssection.Iyy)
+
+
 ######################## Part III - Torsional stiffness calculations #######################################
 ### Primary functions
 """ If you desire, you may disable this line, and manually overwrite the values listed between lines 60-62"""
