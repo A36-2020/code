@@ -61,10 +61,6 @@ def simpson(F,z,x):
     Q = []
     dz = abs(float((b-a)/2))
     for i in np.arange(Nx):
-<<<<<<< HEAD
-=======
-        #print(i)
->>>>>>> 1cdb69f97e170eed096b1f2b112f65267008b2e8
         q = []
         cop = []
         for j in np.arange(Nz):
@@ -78,7 +74,7 @@ def simpson(F,z,x):
         int_fz= (F[0,i]*a+sum(cop)+F[-1,i]*b)*dz/3
         Q.append(int_f)
         CoP.append(int_fz/int_f)
-    return np.asarray(Q),np.asarray(CoP)
+    return Q,CoP
 
 def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
     #This function interpolates the values for Q and the z-coord of q on a list of xcoords.
@@ -86,111 +82,6 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
     #The values for Q are also scaled; meaning that if more points are supplied, the distributed load is discretised
     #in more smaller point loads.
 
-<<<<<<< HEAD
-# #Interpolate aerodynamic load over x-axis with n points
-# #output array sample:
-# q = [1,2,5,4,2,3]
-# qz = [0.2,0.2,0.4,0.6,0.2,0.5]
-#
-# x = [0.25,0.5,0.75,1]
-# x = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
-# spanlength = 12
-#
-# def interpolation_over_span(x, q, qz, spanlength):
-#     oringinal_interval_len = spanlength/len(q)
-#     new_interval_len = spanlength/len(x)
-#     qlist = []
-#     qzlist = []
-#     for i in x:
-#         xcoord  = i*spanlength
-#         lower_than_x = []
-#         lower_than_x_qz = []
-#         higher_than_x = []
-#         higher_than_x_qz = []
-#         fractionfound = False
-#         for j in range(len(q)):
-#             qcoord = j/len(q)*spanlength
-#             if qcoord < xcoord:
-#                 lower_than_x.append(q[j])
-#                 lower_than_x_qz.append(qz[j])
-#             if qcoord > xcoord:
-#                 if fractionfound == False:
-#                     fraction = qcoord/xcoord - 1
-#                     fractionfound = True
-#                 higher_than_x.append(q[j])
-#                 higher_than_x_qz.append(qz[j])
-#
-#         lower_qz = qz[0]
-#         upper_qz = qz[-1]
-#         lower_q = q[0]
-#         upper_q = q[-1]
-#
-#         #print(xcoord)
-#
-#         if len(lower_than_x) > 0:
-#             lower_qz = lower_than_x_qz[-1]
-#             lower_q = lower_than_x[-1]
-#         if len(higher_than_x) > 0:
-#             upper_qz = higher_than_x_qz[0]
-#             upper_q = higher_than_x[0]
-#
-#         #print(lower_qz)
-#         #print(upper_qz)
-#         #print(lower_q)
-#         #print(upper_q)
-#         #print(fraction)
-#         #print("")
-#
-#         interpolated_q = (lower_q+(upper_q-lower_q)*fraction) * new_interval_len/oringinal_interval_len
-#         interpolated_qz = lower_qz +(upper_qz-lower_qz)*fraction
-#
-#         #print("Interpolated values q & qz:")
-#         #print(interpolated_q)
-#         #print(interpolated_qz)
-#         #print("")
-#         #print("")
-#
-#         qlist.append(interpolated_q)
-#         qzlist.append(interpolated_qz)
-#     return qlist, qzlist
-#
-# a,b = interpolation_over_span(x,q,qz,spanlength)
-# # print(a)
-# # print(b)
-
-
-r1x = 0.2
-r2x = 0.4
-r3x = 0.6
-E = 1000
-I = 1.2
-
-def maccaulay_reactionforces_inx(r1x,r2x,r3x,x,Q,spanlength,E,I):
-
-#Q contribution to displacement Macaulay Moment Equations
-def(Mz_Q)
-    mask_x1 = (x[0]<x1)
-    mask_x2 = (x[0]<x2)
-    mask_x3 = (x[0]<x3)
-
-    Q_x1 = Q[mask_x1]
-    Q_x2 = Q[mask_x2]
-    Q_x3 = Q[mask_x3]
-
-    x_x1 = x[0][mask_x1]
-    x_x2 = x[0][mask_x2]
-    x_x3 = x[0][mask_x3]
-
-    Mz_Q_x1 = Q_x1*x_x1
-    Mz_Q_x2 = Q_x2*x_x2
-    Mz_Q_x3 = Q_x3*x_x3
-
-    return Mz_Q_x1, Mz_Q_x2, Mz_Q_x3
-
-#Right part of Matrix
-def (BM_right):
-    A = np.matrix([[P*sin(30./180*pi)+sum(Q)],[P*cos(30./180*pi)],[])
-=======
     oringinal_interval_len = spanlength/len(q)
     new_interval_len = spanlength/len(x_to_interpolate)
     qlist = []
@@ -221,7 +112,7 @@ def (BM_right):
         lower_q = q[0]
         upper_q = q[-1]
 
-        if len(lower_than_x) >= 0:
+        if len(lower_than_x) > 0:
             lower_qz = lower_than_x_qz[-1]
             lower_q = lower_than_x[-1]
         if len(higher_than_x) > 0:
@@ -246,6 +137,25 @@ a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
+
+def(Mz_Q)
+    mask_x1 = (x[0]<x1)
+    mask_x2 = (x[0]<x2)
+    mask_x3 = (x[0]<x3)
+
+    Q_x1 = Q[mask_x1]
+    Q_x2 = Q[mask_x2]
+    Q_x3 = Q[mask_x3]
+
+    x_x1 = x[0][mask_x1]
+    x_x2 = x[0][mask_x2]
+    x_x3 = x[0][mask_x3]
+
+    Mz_Q_x1 = Q_x1*x_x1
+    Mz_Q_x2 = Q_x2*x_x2
+    Mz_Q_x3 = Q_x3*x_x3
+
+    return Mz_Q_x1, Mz_Q_x2, Mz_Q_x3
 
 def moments_around_z(q,qx, x):
     momentsum = 0 #[Nm]
@@ -321,5 +231,49 @@ def bigmatrix(x1,x2,x3,xa,ca,ha):
     print(bm)
 
 
-bigmatrix(1,2,3,4,Ca,la)
->>>>>>> 1cdb69f97e170eed096b1f2b112f65267008b2e8
+def shear_force_calculations(R1,R1x,R2,R2x,R3,R3x,A,Ax,Qvalues,la,xsteps):
+    interpolated_xlist=np.linspace(0,la,xsteps)
+
+    shear_due_to_aero, b = interpolation_over_span(interpolated_xlist, x, Qvalues, CoP, la)
+
+    shearvalues = [0]
+    R1added = False
+    R2added = False
+    R3added = False
+    Aadded = False
+    for i in range(len(interpolated_xlist)):
+        localshear = shearvalues[-1] + shear_due_to_aero[i]
+
+        if interpolated_xlist[i]>R1x and R1added == False:
+            R1added = True
+            localshear = localshear+R1
+        if interpolated_xlist[i]>R2x and R2added == False:
+            R2added = True
+            localshear = localshear+R2
+        if interpolated_xlist[i]>R3x and R3added == False:
+            R3added = True
+            localshear = localshear+R3
+        if interpolated_xlist[i]>Ax and Aadded == False:
+            Aadded = True
+            localshear = localshear+A
+
+        shearvalues.append(localshear)
+    shearvalues = shearvalues[1:]
+    return shearvalues,interpolated_xlist
+
+def internal_moment_calculations(shear, shear_x):
+    internal_moment_list = [0]
+    xdelta = shear_x[1] - shear_x[0]
+    for i in range(len(shear_x)):
+        internal_moment = internal_moment_list[-1] + shear[i]*xdelta
+        internal_moment_list.append(internal_moment)
+    internal_moment_list = internal_moment_list[1:]
+    return internal_moment_list
+
+
+
+shear,shear_x = shear_force_calculations(1000,0.1,1000,0.4,1000,0.8,100,0.5,Qthingy,la,2000)
+internal_moments = internal_moment_calculations(shear,shear_x)
+
+plt.plot(shear_x,internal_moments)
+plt.show()
