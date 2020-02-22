@@ -47,7 +47,6 @@ for j in range (Nx):
     xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
     x[0,j] = xPos
 
-# plot surface
 #---------------------------------------
 
 
@@ -62,6 +61,10 @@ def simpson(F,z,x):
     Q = []
     dz = abs(float((b-a)/2))
     for i in np.arange(Nx):
+<<<<<<< HEAD
+=======
+        #print(i)
+>>>>>>> 1cdb69f97e170eed096b1f2b112f65267008b2e8
         q = []
         cop = []
         for j in np.arange(Nz):
@@ -77,8 +80,13 @@ def simpson(F,z,x):
         CoP.append(int_fz/int_f)
     return np.asarray(Q),np.asarray(CoP)
 
-Q,CoP = simpson(arr,z,x)
+def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
+    #This function interpolates the values for Q and the z-coord of q on a list of xcoords.
+    #These coords can range from 0-1, and have to be given in list form.
+    #The values for Q are also scaled; meaning that if more points are supplied, the distributed load is discretised
+    #in more smaller point loads.
 
+<<<<<<< HEAD
 # #Interpolate aerodynamic load over x-axis with n points
 # #output array sample:
 # q = [1,2,5,4,2,3]
@@ -182,3 +190,117 @@ def(Mz_Q)
 #Right part of Matrix
 def (BM_right):
     A = np.matrix([[P*sin(30./180*pi)+sum(Q)],[P*cos(30./180*pi)],[])
+=======
+    oringinal_interval_len = spanlength/len(q)
+    new_interval_len = spanlength/len(x_to_interpolate)
+    qlist = []
+    qzlist = []
+    for i in x_to_interpolate:
+        xcoord  = i*spanlength
+        lower_than_x = []
+        lower_than_x_qz = []
+        higher_than_x = []
+        higher_than_x_qz = []
+        fractionfound = False
+        lower_qcoord = 0
+        for j in range(len(q)):
+            qcoord = xcoord_list[0][j]
+            if qcoord <= xcoord:
+                lower_than_x.append(q[j])
+                lower_than_x_qz.append(qz[j])
+                lower_qcoord = qcoord
+            if qcoord > xcoord:
+                if fractionfound == False:
+                    fraction = (xcoord-lower_qcoord)/(qcoord-lower_qcoord)
+                    fractionfound = True
+                higher_than_x.append(q[j])
+                higher_than_x_qz.append(qz[j])
+
+        lower_qz = qz[0]
+        upper_qz = qz[-1]
+        lower_q = q[0]
+        upper_q = q[-1]
+
+        if len(lower_than_x) >= 0:
+            lower_qz = lower_than_x_qz[-1]
+            lower_q = lower_than_x[-1]
+        if len(higher_than_x) > 0:
+            upper_qz = higher_than_x_qz[0]
+            upper_q = higher_than_x[0]
+
+        interpolated_q = (lower_q+(upper_q-lower_q)*fraction) * new_interval_len/oringinal_interval_len
+        interpolated_qz = lower_qz +(upper_qz-lower_qz)*fraction
+
+        qlist.append(interpolated_q)
+        qzlist.append(interpolated_qz)
+    return qlist, qzlist
+
+
+interpolated_xlist = np.linspace(0,1,400)
+interpolated_xlist = interpolated_xlist[1:]
+
+
+Qthingy,CoP = simpson(arr,z,x)
+a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
+
+scaled_interpolated_xlist = []
+for i in interpolated_xlist:
+    scaled_interpolated_xlist.append(i*la)
+
+def moments_around_z(q,qx, x):
+    momentsum = 0 #[Nm]
+    for i in range(len(qx)):
+        qvalue  = q[i]
+        qxvalue = qx[i]
+        momentsum = momentsum + qvalue * (qxvalue-x)
+    return float(momentsum)
+
+
+momentsum = moments_around_z(Qthingy, CoP, -Ca)
+#print(momentsum)
+
+
+def bigmatrix(x1,x2,x3,xa,ca,ha):
+    bm = np.zeros((11,11))
+    #Row 1:
+    bm[0][0] = 1
+    bm[0][1] = 1
+    bm[0][2] = 1
+    bm[0][6] = m.sin(m.pi/6)
+    #Row 2:
+    bm[1][3] = 1
+    bm[1][4] = 1
+    bm[1][5] = 1
+    bm[1][6] = m.cos(m.pi/6)
+    #Row 3
+    bm[2][0] = -ca
+    bm[2][1] = -ca
+    bm[2][2] = -ca
+    bm[2][3] = ha / 2
+    bm[2][4] = ha / 2
+    bm[2][5] = ha / 2
+    bm[2][6] = m.cos(m.pi/6)*ha - m.sin(m.pi/6)*ca
+    #Row 4
+    bm[3][3] = x1
+    bm[3][4] = x2
+    bm[3][5] = x3
+    bm[3][6] = m.cos(m.pi/6)*(x2-xa/2)
+    #Row 5
+    bm[4][0] = x1
+    bm[4][1] = x2
+    bm[4][2] = x3
+    bm[4][6] = m.sin(m.pi / 6) * (x2 - xa / 2)
+    #Row 6
+    bm[5][6] = x1
+    bm[5][7] = 1
+
+    #Row 7
+    bm[6][0] = (x2-x1)**3
+
+
+
+    print(bm)
+
+
+bigmatrix(1,2,3,4,Ca,la)
+>>>>>>> 1cdb69f97e170eed096b1f2b112f65267008b2e8
