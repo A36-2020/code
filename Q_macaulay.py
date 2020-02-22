@@ -3,7 +3,11 @@ from math import *
 from AerodynamicLoad import *
 from F100 import *
 
+<<<<<<< HEAD
 
+=======
+print(len(Q),len(x[0]))
+>>>>>>> wieger
 mask_x1 = (x[0]<x1)
 mask_x2 = (x[0]<x2)
 mask_x3 = (x[0]<x3)
