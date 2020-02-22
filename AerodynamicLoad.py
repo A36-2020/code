@@ -261,6 +261,7 @@ momentsum = moments_around_z(Qthingy, CoP, -Ca)
 
 
 def bigmatrix(x1,x2,x3,xa,ca,ha):
+    E = 72*10**9
     bm = np.zeros((11,11))
     #Row 1:
     bm[0][0] = 1
@@ -296,6 +297,24 @@ def bigmatrix(x1,x2,x3,xa,ca,ha):
 
     #Row 7
     bm[6][0] = (x2-x1)**3
+
+    #Row 8
+    bm[7][0] = x1
+    bm[7][1] = 1
+    #Row 9
+    bm[8][0] = 6*E*Izz*x1
+    bm[8][1] = 6*E*izz
+    bm[8][4] = (x2-x1)**3
+    bm[8][-1]= sin(theta/180.*pi)*(x2-(x2-xa/2))**3
+    #Row 10
+    bm[9][0] = 6*E*Izz*x1
+    bm[9][1] = 6*E*izz
+    bm[9][4] = (x3-x1)**3
+    bm[9][5] = (x3-x2)**3
+    bm[9][-1]= sin(theta/180.*pi)*(x3-(x2-xa/2))**3
+    #Row 11
+    bm[10][2]= x1
+    bm[10][3]= 1
 
 
 
