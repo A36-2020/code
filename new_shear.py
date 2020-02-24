@@ -252,12 +252,18 @@ class section():
         self.q = q
         self.m = m
 
+        self.mises = np.sqrt(np.square(self.q)+3*np.square(self.q/t(self.s)))
+
     def show(self):
         plt.scatter(self.z, self.y, c=self.q, vmin=-self.m, vmax=self.m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
         plt.scatter(self.z, self.y, c=self.sig)
+        plt.colorbar()
+        plt.axis('equal')
+        plt.show()
+        plt.scatter(self.z, self.y, c=self.mises)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
