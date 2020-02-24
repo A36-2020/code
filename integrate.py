@@ -8,3 +8,8 @@ def integrate(y,x):
         val += (y[i-1]+y[i])/2*(x[i]-x[i-1])
     return val
 
+def integrate_2(y,dx):
+    val = 0.0
+    for i in range(1,y.shape[0]):
+        val += (y[i-1]+y[i])/2*(dx)
+    return val

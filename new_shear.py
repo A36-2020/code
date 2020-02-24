@@ -3,7 +3,7 @@ import F100
 import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt
-from integrate import integrate
+from integrate import integrate, integrate_2
 
 c = F100.Ca - F100.h/2
 r = F100.h/2
@@ -197,31 +197,59 @@ print(Iyy, Izz)
 class section():
     def __init__(self, ds, Vy, Vz, T, M=0):
 
-        endt = int(2*l/ds)
+        endt = int(2*l/ds)+1
         endl = endt + int(r*pi/ds)
 
         self.s = np.arange(0,2*l+r*pi+2*r,ds)
         self.qsy = Vy*(line_yy(self.s)+sumy(self.s))/Iyy
-        self.qsz = Vz*(line_zz(self.s)+sumz(self.s))/(Izz+(0.204-r)**2*0.002)
+        self.qsz = Vz*(line_zz(self.s)+sumz(self.s))/Izz
         self.qs = self.qsz + self.qsy
 
-        self.qb = -1*integrate((self.qs/t(self.s)), self.s)/integrate((1/t(self.s)), self.s)
-        self.sc = -1*integrate((self.qsy/Vy)*arm(self.s), self.s)
-        print(self.sc)
+        qt = self.qs[:endt]
+        ql = self.qs[endt:endl]
+        sp = self.qs[endl:]
+
+        qbt = -1*(integrate_2(qt, ds)/F100.tsk+integrate_2(-1*sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
+        qbl = -1*(integrate_2(ql, ds)/F100.tsk+integrate_2(sp, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
+
+        qt += qbt
+        ql += qbl
+        sp = sp + qbl - qbt
+
+        # Shear flow over, now torque
+        A = np.array([[1,1],[0,0]])
+        A[1,0] = 4/pi/pi/(r**4)*(r*pi/F100.tsk+2*r/F100.tsp)
+        A[1,1] = -1/r/r/c/c*(2*l/F100.tsk+2*r/F100.tsp)
+
+        T1, T2 = np.linalg.solve(A, [T, 0])
+
+        q1 = T1/2/(0.5*r**2*pi)
+        q2 = T2/2/(r*c)
+
+        qt += q2
+        ql += q1
+        sp = sp + q1 - q2
+
+
+        q = np.hstack((qt,ql,sp))
+        sc = -1*integrate_2(q*arm(self.s),ds)/Vy
+        print(sc)
+
 
         self.z = z(self.s)
         self.y = y(self.s)
 
-        q = self.qs+self.qb
-        
-        print(q[endt-5]-q[endt+5]+q[-1])
-        print(-q[0]+q[endl-5]-q[endl+5])
 
         m = np.max(np.abs(q))
         
-        plt.scatter(self.z,self.y,c=q,cmap="PiYG", vmin=-m, vmax=m)
+        print((q[endt-1]-q[endt]+q[-1])/m)
+        print((-q[0]+q[endl-1]-q[endl])/m)
+
+        
+        plt.scatter(sc, 0)
+        plt.scatter(self.z,self.y, c=q, vmin=-m, vmax=m)
         plt.axis('equal')
         plt.colorbar()
         plt.show()
 
-section(0.0001, 0, 1, 0)
+section(0.0001, 10, 4, 5)
