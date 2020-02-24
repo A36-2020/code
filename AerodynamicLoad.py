@@ -56,7 +56,6 @@ for j in range (Nx):
 #Returns q integration for every x-axis segment
 # simpson integration method
 def simpson(F,z,x):
-    F = -1*F
     a = z[0]
     b = z[-1]
     CoP = []
@@ -134,6 +133,7 @@ interpolated_xlist = interpolated_xlist[1:]
 
 
 Qthingy,CoP = simpson(arr,z,x)
+print(CoP,Qthingy)
 a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
 scaled_interpolated_xlist = []
@@ -141,7 +141,7 @@ for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
 
 def Mz_Q(x1,x2,x3,Q,x,CoP,Ca):
-    Q = -(np.asarray(Q))
+    Q = (np.asarray(Q))
     x = np.asarray(x)
     CoP = np.asarray(CoP)
 
@@ -184,25 +184,28 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
 
     bm = np.zeros((11,11))
     #Row 1:
+    #Sum of forces in y
     bm[0][0] = 1
     bm[0][1] = 1
     bm[0][2] = 1
     bm[0][6] = m.sin(theta/180.*m.pi)
     #Row 2:
+    #Sum of forces in z
     bm[1][3] = 1
     bm[1][4] = 1
     bm[1][5] = 1
     bm[1][6] = m.cos(theta/180.*m.pi)
     #Row 3
+    #Sum of moments around x
     bm[2][0] = -ca
     bm[2][1] = -ca
     bm[2][2] = -ca
 
     #WHY HA/2 INSTEAD OF ZERO?
-    bm[2][3] = ha / 2
-    bm[2][4] = ha / 2
-    bm[2][5] = ha / 2
-    bm[2][6] = m.cos(theta/180.*m.pi)*ha - m.sin(theta/180.*m.pi)*ca
+    bm[2][3] = 0
+    bm[2][4] = 0
+    bm[2][5] = 0
+    bm[2][6] = m.cos(theta/180.*m.pi)*ha/2 - m.sin(theta/180.*m.pi)*ca
     #Row 4
     bm[3][3] = x1
     bm[3][4] = x2
@@ -250,7 +253,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
 
     bm_knowns[0] = P*m.sin(theta/180.*m.pi)-np.sum(np.asarray(Qthingy))
     bm_knowns[1] = P*m.cos(theta/180.*m.pi)
-    bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha - P*m.sin(theta/180.*m.pi)*ca - np.sum(Mx_Q)
+    bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha/2 - P*m.sin(theta/180.*m.pi)*ca + np.sum(Mx_Q)
     bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
     bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)+np.sum(Mz_Q)
     bm_knowns[5] = 1/(6*E*Izz_total)*np.sum(Mz_Q_x1**3)+d1
