@@ -93,6 +93,8 @@ ycentroidtotal = ytimesA/areasum
 print(z_centroid)
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
+    print(sum(Area))
+    print("----------------------")
     print(z_centroids_straight)
     print(y_centroids_straight)
     print(z_centroids_semicirc)
