@@ -131,8 +131,10 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
 interpolated_xlist = np.linspace(0,1,400)
 interpolated_xlist = interpolated_xlist[1:]
 
-print(z.shape,x.shape,z)
+
 Qthingy,CoP = simpson(arr,z,x)
+print("Qthingy:")
+print(Qthingy)
 
 a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
@@ -284,7 +286,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
 # print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
 R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
-#print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
+print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
 def shear_force_in_y_calculations(R1y, x1, R2y, x2, R3y, x3, A, P, xa, Qvalues, la, xsteps):
     interpolated_xlist=np.linspace(0,la,xsteps)
