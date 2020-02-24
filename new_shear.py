@@ -198,7 +198,7 @@ print(Iyy, Izz)
 class section():
     def __init__(self, ds, Vy, Vz, T, My=0, Mz=0):
 
-        endt = int(2*l/ds)+1
+        endt = int(2*l/ds)
         endl = endt + int(r*pi/ds)
 
         self.s = np.arange(0,2*l+r*pi+2*r,ds)
@@ -210,7 +210,7 @@ class section():
         ql = self.qs[endt:endl]
         sp = self.qs[endl:]
 
-        qbt = -1*(integrate_2(qt, ds)/F100.tsk+integrate_2(-1*sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
+        qbt = -1*(integrate_2(qt, ds)/F100.tsk-integrate_2(sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
         qbl = -1*(integrate_2(ql, ds)/F100.tsk+integrate_2(sp, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
 
         qt += qbt
@@ -219,8 +219,10 @@ class section():
 
         # Shear flow over, now torque
         A = np.array([[1,1],[0,0]])
-        A[1,0] = 4/pi/pi/(r**4)*(r*pi/F100.tsk+2*r/F100.tsp)
-        A[1,1] = -1/r/r/c/c*(2*l/F100.tsk+2*r/F100.tsp)
+        A1 = 0.5 *pi*r**2
+        A2 = c*r
+        A[1,0] = 1/4/A1**2*(r*pi/F100.tsk+2*r/F100.tsp)
+        A[1,1] = -1/4/A2*(2*l/F100.tsk+2*r/F100.tsp)
 
         T1, T2 = np.linalg.solve(A, [T, 0])
 
@@ -246,8 +248,8 @@ class section():
         m = np.max(np.abs(q))
         
         # Sanity check bro
-        print((q[endt-1]-q[endt]+q[-1])/m)
-        print((-q[0]+q[endl-1]-q[endl])/m)
+        print((q[endt-4]-q[endt+4]+q[-1])/m)
+        print((-q[0]+q[endl-4]-q[endl+4])/m)
 
         self.q = q
         self.m = m
@@ -268,5 +270,4 @@ class section():
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 10, 4, 5, 0, 1)
-s.show()
+s = section(0.0001, 0, -1, 0, 0, 1)
