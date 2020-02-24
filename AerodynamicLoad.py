@@ -279,34 +279,37 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
 # print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
 R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
-print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
+#print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
-
-def shear_force_calculations(R1,R1x,R2,R2x,R3,R3x,A,Ax,Qvalues,la,xsteps):
+def shear_force_in_y_calculations(R1y, x1, R2y, x2, R3y, x3, A, P, xa, Qvalues, la, xsteps):
     interpolated_xlist=np.linspace(0,la,xsteps)
-
-    shear_due_to_aero, b = interpolation_over_span(interpolated_xlist, x, Qvalues, CoP, la)
+    scaled_down_interpolated_xlist = np.linspace(0,1,xsteps)
+    shear_due_to_aero, b = interpolation_over_span(scaled_down_interpolated_xlist, x, Qvalues, CoP, la)
 
     shearvalues = [0]
     R1added = False
     R2added = False
     R3added = False
+    Padded = False
     Aadded = False
     for i in range(len(interpolated_xlist)):
         localshear = shearvalues[-1] + shear_due_to_aero[i]
 
-        if interpolated_xlist[i]>R1x and R1added == False:
+        if interpolated_xlist[i]>x1 and R1added == False:
             R1added = True
-            localshear = localshear+R1
-        if interpolated_xlist[i]>R2x and R2added == False:
+            localshear = localshear + R1y
+        if interpolated_xlist[i]>x2 and R2added == False:
             R2added = True
-            localshear = localshear+R2
-        if interpolated_xlist[i]>R3x and R3added == False:
+            localshear = localshear + R2y
+        if interpolated_xlist[i]>x3 and R3added == False:
             R3added = True
-            localshear = localshear+R3
-        if interpolated_xlist[i]>Ax and Aadded == False:
+            localshear = localshear + R3y
+        if interpolated_xlist[i]>x2-xa/2 and Aadded == False:
             Aadded = True
-            localshear = localshear+A
+            localshear = localshear+A*m.sin(30/180.*m.pi)
+        if interpolated_xlist[i]>x2+xa/2 and Padded == False:
+            Padded = True
+            localshear = localshear-P*m.sin(30/180.*m.pi)
 
         shearvalues.append(localshear)
     shearvalues = shearvalues[1:]
@@ -321,10 +324,38 @@ def internal_moment_calculations(shear, shear_x):
     internal_moment_list = internal_moment_list[1:]
     return internal_moment_list
 
+def shear_force_in_z_calculations(R1x, x1, R2x, x2, R3x, x3, A, P, xa, la, xsteps):
+    interpolated_xlist=np.linspace(0,la,xsteps)
+    shearvalues = [0]
+    R1added = False
+    R2added = False
+    R3added = False
+    Padded = False
+    Aadded = False
+    for i in range(len(interpolated_xlist)):
+        localshear = shearvalues[-1]
+        if interpolated_xlist[i] > x1 and R1added == False:
+            R1added = True
+            localshear = localshear + R1x
+        if interpolated_xlist[i] > x2 and R2added == False:
+            R2added = True
+            localshear = localshear + R2x
+        if interpolated_xlist[i] > x3 and R3added == False:
+            R3added = True
+            localshear = localshear + R3x
+        if interpolated_xlist[i] > x2 - xa / 2 and Aadded == False:
+            Aadded = True
+            localshear = localshear + A * m.cos(30 / 180. * m.pi)
+        if interpolated_xlist[i] > x2 + xa / 2 and Padded == False:
+            Padded = True
+            localshear = localshear - P * m.cos(30 / 180. * m.pi)
+
+        shearvalues.append(localshear)
+    shearvalues = shearvalues[1:]
+    return shearvalues, interpolated_xlist
 
 
-shear,shear_x = shear_force_calculations(1000,0.1,1000,0.4,1000,0.8,100,0.5,Qthingy,la,2000)
-internal_moments = internal_moment_calculations(shear,shear_x)
-
-plt.plot(shear_x,internal_moments)
+shear,shear_x = shear_force_in_z_calculations(1000, x1, 1000, x2, 1000, x3, 100, 200, 0.02, la, 2000)
+internal_moments = internal_moment_calculations(shear, shear_x)
+plt.plot(shear_x, internal_moments)
 plt.show()
