@@ -3,13 +3,15 @@ import numpy as np
 import math as m
 from mpl_toolkits import mplot3d
 from F100 import *
-
+from Moment_of_Inertia import *
+from material import *
 # values
 #-------------------------------
 Nz = 81
 Nx = 41
 Ca = 0.505
 la = 1.611
+Izz_total, Iyy_total = Moment_of_inertia()
 
 #array with different loads
 #------------------------------
@@ -54,7 +56,6 @@ for j in range (Nx):
 #Returns q integration for every x-axis segment
 # simpson integration method
 def simpson(F,z,x):
-    F = -1*F
     a = z[0]
     b = z[-1]
     CoP = []
@@ -132,13 +133,18 @@ interpolated_xlist = interpolated_xlist[1:]
 
 
 Qthingy,CoP = simpson(arr,z,x)
+print(CoP,Qthingy)
 a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
 
-def(Mz_Q)
+def Mz_Q(x1,x2,x3,Q,x,CoP,Ca):
+    Q = (np.asarray(Q))
+    x = np.asarray(x)
+    CoP = np.asarray(CoP)
+
     mask_x1 = (x[0]<x1)
     mask_x2 = (x[0]<x2)
     mask_x3 = (x[0]<x3)
@@ -151,84 +157,129 @@ def(Mz_Q)
     x_x2 = x[0][mask_x2]
     x_x3 = x[0][mask_x3]
 
-    Mz_Q_x1 = Q_x1*x_x1
-    Mz_Q_x2 = Q_x2*x_x2
-    Mz_Q_x3 = Q_x3*x_x3
+    Mz_Q    = Q*x
+    Mz_Q_x1 = Q_x1*(x1-x_x1)
+    Mz_Q_x2 = Q_x2*(x2-x_x2)
+    Mz_Q_x3 = Q_x3*(x3-x_x3)
+    Mx_Q    = Q*(Ca+CoP)
 
-    return Mz_Q_x1, Mz_Q_x2, Mz_Q_x3
+    return Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q
 
-def moments_around_z(q,qx, x):
+def moments_x_Q(q,qx,x):
+    q = -(np.asarray(q))
     momentsum = 0 #[Nm]
     for i in range(len(qx)):
-        qvalue  = q[i]
+        qvalue  = -q[i]
         qxvalue = qx[i]
         momentsum = momentsum + qvalue * (qxvalue-x)
     return float(momentsum)
 
 
-momentsum = moments_around_z(Qthingy, CoP, -Ca)
-#print(momentsum)
+Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q = Mz_Q(x1,x2,x3,Qthingy,x,Ca,CoP)
+print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
 
+def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3):
 
-def bigmatrix(x1,x2,x3,xa,ca,ha):
-    E = 72*10**9
+    #Matrix with unknowns (left part)
+
     bm = np.zeros((11,11))
     #Row 1:
+    #Sum of forces in y
     bm[0][0] = 1
     bm[0][1] = 1
     bm[0][2] = 1
-    bm[0][6] = m.sin(m.pi/6)
+    bm[0][6] = m.sin(theta/180.*m.pi)
     #Row 2:
+    #Sum of forces in z
     bm[1][3] = 1
     bm[1][4] = 1
     bm[1][5] = 1
-    bm[1][6] = m.cos(m.pi/6)
+    bm[1][6] = m.cos(theta/180.*m.pi)
     #Row 3
+    #Sum of moments around x
     bm[2][0] = -ca
     bm[2][1] = -ca
     bm[2][2] = -ca
-    bm[2][3] = ha / 2
-    bm[2][4] = ha / 2
-    bm[2][5] = ha / 2
-    bm[2][6] = m.cos(m.pi/6)*ha - m.sin(m.pi/6)*ca
+
+    #WHY HA/2 INSTEAD OF ZERO?
+    bm[2][3] = 0
+    bm[2][4] = 0
+    bm[2][5] = 0
+    bm[2][6] = m.cos(theta/180.*m.pi)*ha/2 - m.sin(theta/180.*m.pi)*ca
     #Row 4
     bm[3][3] = x1
     bm[3][4] = x2
     bm[3][5] = x3
-    bm[3][6] = m.cos(m.pi/6)*(x2-xa/2)
+    bm[3][6] = m.cos(theta/180.*m.pi)*(x2-xa/2)
     #Row 5
     bm[4][0] = x1
     bm[4][1] = x2
     bm[4][2] = x3
-    bm[4][6] = m.sin(m.pi / 6) * (x2 - xa / 2)
+    bm[4][6] = m.sin(theta/180.*m.pi) * (x2 - xa / 2)
     #Row 6
     bm[5][6] = x1
     bm[5][7] = 1
-
     #Row 7
     bm[6][0] = (x2-x1)**3
-
+    bm[6][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
+    bm[6][7] = 6*E*Izz_total*x1
+    bm[6][8] = 6*E*Izz_total
     #Row 8
-    bm[7][0] = x1
-    bm[7][1] = 1
+    bm[7][0] = (x3-x1)**3
+    bm[7][1] = (x3-x2)**3
+    bm[7][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
+    bm[7][7] = 6*E*Izz_total*x1
+    bm[7][8] = 6*E*Izz_total
     #Row 9
-    bm[8][0] = 6*E*Izz*x1
-    bm[8][1] = 6*E*izz
-    bm[8][4] = (x2-x1)**3
-    bm[8][-1]= sin(theta/180.*pi)*(x2-(x2-xa/2))**3
+    bm[8][2]= x1
+    bm[8][3]= 1
     #Row 10
-    bm[9][0] = 6*E*Izz*x1
-    bm[9][1] = 6*E*izz
-    bm[9][4] = (x3-x1)**3
-    bm[9][5] = (x3-x2)**3
-    bm[9][-1]= sin(theta/180.*pi)*(x3-(x2-xa/2))**3
+    bm[9][3] = (x2-x1)**3
+    bm[9][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
+    bm[9][9] = 6*E*Izz_total*x1
+    bm[9][10] = 6*E*Izz_total
     #Row 11
-    bm[10][2]= x1
-    bm[10][3]= 1
+    bm[10][3] = (x3-x1)**3
+    bm[10][4] = (x3-x2)**3
+    bm[10][6]= m.sin(theta/180.*m.pi)*(x3-(x2-xa/2))**3
+    bm[10][9] = 6*E*Izz_total*x1
+    bm[10][10] = 6*E*Izz_total
 
 
 
-    print(bm)
+    #Matrix of knowns (right part)
+
+    bm_knowns = np.zeros((11,1))
+
+    bm_knowns[0] = P*m.sin(theta/180.*m.pi)-np.sum(np.asarray(Qthingy))
+    bm_knowns[1] = P*m.cos(theta/180.*m.pi)
+    bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha/2 - P*m.sin(theta/180.*m.pi)*ca + np.sum(Mx_Q)
+    bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
+    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)+np.sum(Mz_Q)
+    bm_knowns[5] = 1/(6*E*Izz_total)*np.sum(Mz_Q_x1**3)+d1
+    bm_knowns[6] = np.sum(Mz_Q_x2**3)
+    bm_knowns[7] = np.sum(Mz_Q_x3**3)+P*m.sin(theta/180.*m.pi)*(xa/2)**3+6*E*Izz_total
+    bm_knowns[8] = 0
+    bm_knowns[9] = 0
+    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(xa/2)**3
+
+    # print(bm)
+    variables = np.linalg.solve(bm,bm_knowns)
+    R1y = variables[0]
+    R2y = variables[1]
+    R3y = variables[2]
+    R1z = variables[3]
+    R2z = variables[4]
+    R3z = variables[5]
+    A   = variables[6]
+    C1y = variables[7]
+    C2y = variables[8]
+    C1z = variables[9]
+    C2z = variables[10]
+    return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
+# print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
+R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
+print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
 
 def shear_force_calculations(R1,R1x,R2,R2x,R3,R3x,A,Ax,Qvalues,la,xsteps):
