@@ -192,10 +192,11 @@ def _sumz(s):
 sumz = np.vectorize(_sumz)
 
 Iyy, Izz = Moment_of_Inertia.Moment_of_inertia()
+zbar = 0.204
 print(Iyy, Izz)
 
 class section():
-    def __init__(self, ds, Vy, Vz, T, M=0):
+    def __init__(self, ds, Vy, Vz, T, My=0, Mz=0):
 
         endt = int(2*l/ds)+1
         endl = endt + int(r*pi/ds)
@@ -232,24 +233,34 @@ class section():
 
 
         q = np.hstack((qt,ql,sp))
-        sc = -1*integrate_2(q*arm(self.s),ds)/Vy
-        print(sc)
+        # Direct Stress
+        sigy = My*y(self.s)/Iyy
+        sigz = Mz*(z(self.s)-zbar)/Izz
+        self.sig = sigy+sigz
 
-
+        # Visualisation
         self.z = z(self.s)
         self.y = y(self.s)
 
 
         m = np.max(np.abs(q))
         
+        # Sanity check bro
         print((q[endt-1]-q[endt]+q[-1])/m)
         print((-q[0]+q[endl-1]-q[endl])/m)
 
-        
-        plt.scatter(sc, 0)
-        plt.scatter(self.z,self.y, c=q, vmin=-m, vmax=m)
-        plt.axis('equal')
+        self.q = q
+        self.m = m
+
+    def show(self):
+        plt.scatter(self.z, self.y, c=self.q, vmin=-self.m, vmax=self.m)
         plt.colorbar()
+        plt.axis('equal')
+        plt.show()
+        plt.scatter(self.z, self.y, c=self.sig)
+        plt.colorbar()
+        plt.axis('equal')
         plt.show()
 
-section(0.0001, 10, 4, 5)
+s = section(0.0001, 10, 4, 5, 0, 1)
+s.show()
