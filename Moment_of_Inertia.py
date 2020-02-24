@@ -29,12 +29,3 @@ def Moment_of_inertia():
 
 if  __name__ == '__main__':
     print(Moment_of_inertia())
-
-
-
-
-
-
-
-
-
