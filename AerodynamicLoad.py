@@ -131,9 +131,9 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
 interpolated_xlist = np.linspace(0,1,400)
 interpolated_xlist = interpolated_xlist[1:]
 
-
+print(z.shape,x.shape,z)
 Qthingy,CoP = simpson(arr,z,x)
-print(CoP,Qthingy)
+print(CoP)
 a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
 scaled_interpolated_xlist = []
@@ -176,7 +176,7 @@ def moments_x_Q(q,qx,x):
 
 
 Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q = Mz_Q(x1,x2,x3,Qthingy,x,Ca,CoP)
-print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
+# print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
 
 def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3):
 
@@ -217,8 +217,8 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     bm[4][2] = x3
     bm[4][6] = m.sin(theta/180.*m.pi) * (x2 - xa / 2)
     #Row 6
-    bm[5][6] = x1
-    bm[5][7] = 1
+    bm[5][7] = x1
+    bm[5][8] = 1
     #Row 7
     bm[6][0] = (x2-x1)**3
     bm[6][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
@@ -227,12 +227,12 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     #Row 8
     bm[7][0] = (x3-x1)**3
     bm[7][1] = (x3-x2)**3
-    bm[7][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
+    bm[7][6] = m.sin(theta/180.*m.pi)*(x3-(x2-xa/2))**3
     bm[7][7] = 6*E*Izz_total*x1
     bm[7][8] = 6*E*Izz_total
     #Row 9
-    bm[8][2]= x1
-    bm[8][3]= 1
+    bm[8][9]= x1
+    bm[8][10]= 1
     #Row 10
     bm[9][3] = (x2-x1)**3
     bm[9][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
@@ -255,13 +255,13 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     bm_knowns[1] = P*m.cos(theta/180.*m.pi)
     bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha/2 - P*m.sin(theta/180.*m.pi)*ca + np.sum(Mx_Q)
     bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
-    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)+np.sum(Mz_Q)
-    bm_knowns[5] = 1/(6*E*Izz_total)*np.sum(Mz_Q_x1**3)+d1
-    bm_knowns[6] = np.sum(Mz_Q_x2**3)
-    bm_knowns[7] = np.sum(Mz_Q_x3**3)+P*m.sin(theta/180.*m.pi)*(xa/2)**3+6*E*Izz_total
+    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
+    bm_knowns[5] = -1/(6*E*Izz_total)*np.sum(Mz_Q_x1**3)+d1
+    bm_knowns[6] = -np.sum(Mz_Q_x2**3)
+    bm_knowns[7] = -np.sum(Mz_Q_x3**3)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3+6*E*Izz_total
     bm_knowns[8] = 0
     bm_knowns[9] = 0
-    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(xa/2)**3
+    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3
 
     # print(bm)
     variables = np.linalg.solve(bm,bm_knowns)
@@ -279,7 +279,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
 # print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
 R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
-print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
+# print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
 
 def shear_force_calculations(R1,R1x,R2,R2x,R3,R3x,A,Ax,Qvalues,la,xsteps):
