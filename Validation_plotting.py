@@ -86,7 +86,7 @@ von_misses_stresses= np.array([float(sheet_stress.cell_value(1,6))])
 for i in range(sheet_stress.nrows-2):
     von_misses_stresses= np.append(von_misses_stresses, [float(sheet_stress.cell_value(i+2,6))], axis=0 )
 
-
+print(von_misses_stresses[2390])
 
 """Saving all the shear stresses for the elements"""
 shear_stresses= np.array([float(sheet_stress.cell_value(1,7))])
@@ -105,30 +105,65 @@ def plotting_all_nodes():
 
     plt.show()
 
-def plot_rectangle(element):
-    x = list([element[:,0]])
-    y = list([element[:,1]])
-    z = list([element[:,2]])
-    verts = [list(zip(x, y, z))]
-    return verts
-
 
 #vtx = sp.rand(4,3)
 #print(vtx)
 #print(all_elements_nodes_coord_deflect[0])
-def plot_elements():
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    for i in range(2000):
-        surf = ax.plot_trisurf(all_elements_nodes_coord_deflect[i][:, 0], all_elements_nodes_coord_deflect[i][:, 1],
-                           all_elements_nodes_coord_deflect[i][:, 2], cmap=cm.jet, linewidth=0)
 
-    fig.colorbar(surf)
+def normal(x, x_min, x_max):
+    return (x-x_min)/(x_max-x_min)
 
-    fig.tight_layout()
-    plt.show()
 
-#plot_elements()
+def plot_polygon_von_misses():
+    ax = a3.Axes3D(pl.figure())
+
+    for i in range(len(all_elements_nodes_coord_deflect)):
+
+        vtx1 = all_elements_nodes_coord_deflect[i,0]
+        vtx2 = all_elements_nodes_coord_deflect[i,1]
+        vtx3 = all_elements_nodes_coord_deflect[i,2]
+        vtx4 = all_elements_nodes_coord_deflect[i,3]
+        if max(abs(vtx1-vtx2))<100 and  max(abs(vtx2-vtx3))<100 and max(abs(vtx3-vtx4))<100 and max(abs(vtx2-vtx4))<100 and max(abs(vtx3-vtx1))<100 and max(abs(vtx4-vtx1))<100:
+            vtx = [vtx1,vtx2,vtx4,vtx3]
+            tri = a3.art3d.Poly3DCollection([vtx])
+            col = normal(von_misses_stresses[i], min(von_misses_stresses), max(von_misses_stresses))
+            cmap=plt.get_cmap("plasma")
+            col=[cmap(col)]
+            tri.set_color(col)
+            ax.add_collection3d(tri)
+
+
+    ax.set(xlim=(0,3000), ylim=(-150,150), zlim=(-600, 200))
+    pl.show()
+
+def plot_polygon_shear():
+    fig = pl.figure()
+    ax = a3.Axes3D(fig)
+    m = cm.ScalarMappable(cmap=plt.get_cmap("plasma"))
+    for i in range(len(all_elements_nodes_coord_deflect)):
+
+        vtx1 = all_elements_nodes_coord_deflect[i,0]
+        vtx2 = all_elements_nodes_coord_deflect[i,1]
+        vtx3 = all_elements_nodes_coord_deflect[i,2]
+        vtx4 = all_elements_nodes_coord_deflect[i,3]
+        if max(abs(vtx1-vtx2))<100 and  max(abs(vtx2-vtx3))<100 and max(abs(vtx3-vtx4))<100 and max(abs(vtx2-vtx4))<100 and max(abs(vtx3-vtx1))<100 and max(abs(vtx4-vtx1))<100:
+            vtx = [vtx1,vtx2,vtx3,vtx4]
+            tri = a3.art3d.Poly3DCollection([vtx])
+            col = normal(shear_stresses[i], min(shear_stresses), max(shear_stresses))
+            cmap=plt.get_cmap("plasma")
+            col=[cmap(col)]
+            tri.set_color(col)
+            ax.add_collection3d(tri)
+    m.set_array([min(shear_stresses), max(shear_stresses)])
+    ax.set(xlim=(0,3000), ylim=(-150,150), zlim=(-600, 200))
+    fig.colorbar(m)
+
+    pl.show()
+
+#plot_polygon_von_misses()
+plot_polygon_shear()
+
+
 def nodes_cross_section(x_coord):
     nodes_list=[]
     for node in list(all_nodes):
@@ -147,5 +182,5 @@ def nodes_cross_section(x_coord):
     ax.set_xlabel('z (m)')
     plt.show()
 
-nodes_cross_section(X_nodes[0])
+#nodes_cross_section(X_nodes[0])
 #nodes_cross_section()
