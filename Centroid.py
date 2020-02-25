@@ -126,6 +126,7 @@ plt.plot(zspar, yspar, color="black", linewidth=0.1)
 circle1 = Wedge((0.5*h,0), 0.5*h, 90, 270, color="black", fill = False)
 fig = plt.gcf()
 ax = fig.gca()
+
 ax.add_artist(circle1)
 fig.set_size_inches(8,3)
 ax.set_ylabel('y (m)')

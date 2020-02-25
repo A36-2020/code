@@ -86,7 +86,7 @@ von_misses_stresses= np.array([float(sheet_stress.cell_value(1,6))])
 for i in range(sheet_stress.nrows-2):
     von_misses_stresses= np.append(von_misses_stresses, [float(sheet_stress.cell_value(i+2,6))], axis=0 )
 
-print(von_misses_stresses[2390])
+
 
 """Saving all the shear stresses for the elements"""
 shear_stresses= np.array([float(sheet_stress.cell_value(1,7))])
@@ -154,33 +154,92 @@ def plot_polygon_shear():
             col=[cmap(col)]
             tri.set_color(col)
             ax.add_collection3d(tri)
-    m.set_array([min(shear_stresses), max(shear_stresses)])
+    m.set_array(np.array([min(shear_stresses), max(shear_stresses)]))
     ax.set(xlim=(0,3000), ylim=(-150,150), zlim=(-600, 200))
     fig.colorbar(m)
 
     pl.show()
 
 #plot_polygon_von_misses()
-plot_polygon_shear()
+#plot_polygon_shear()
+#print(all_elements[len(all_elements)-1][1])
+
+#point_for_element = np.array([[sum(all_elements_nodes_coord[0][:][0])/4, sum(all_elements_nodes_coord[0][:][1])/4, sum(all_elements_nodes_coord[0][:][2])/4, sum(all_elements_nodes_coord[0][:][3])/4]])
+point_for_element= [(all_elements_nodes_coord[0][0]+all_elements_nodes_coord[0][1]+all_elements_nodes_coord[0][2]+all_elements_nodes_coord[0][3])/4]
+for i in range(len(all_elements_nodes_coord)-1):
+    point_for_element.append((all_elements_nodes_coord[i+1][0]+all_elements_nodes_coord[i+1][1]+all_elements_nodes_coord[i+1][2]+all_elements_nodes_coord[i+1][3])/4)
+
+point_for_element=np.array(point_for_element)
 
 
-def nodes_cross_section(x_coord):
-    nodes_list=[]
-    for node in list(all_nodes):
-        if node[0]==x_coord:
-            nodes_list.append(list(node))
-
-    nodes_array= np.array(nodes_list)
-    print(nodes_array)
-
-
+def cross_section_max_von_misses(x_coord):
     fig = plt.gcf()
     ax = fig.gca()
-    plt.scatter(nodes_array[:,2], nodes_array[:,1], c='r', marker='o')
-    ax.set_title('All nodes on this cross-section')
+    ax.invert_xaxis()
+    cmap = plt.get_cmap("jet")
+    m = cm.ScalarMappable(cmap=plt.get_cmap("jet"))
+    col=[]
+    nodes_list=[]
+    c=0
+    for node in list(point_for_element):
+        if abs(node[0]-x_coord)<15 and (abs(node[1]+node[2])>5 or abs(node[1]-node[2])==0) and int(node[1])!=46 and abs(node[1]+46.277)>2:
+            nodes_list.append(list(node))
+            col1 = normal(von_misses_stresses[c], min(von_misses_stresses), max(von_misses_stresses))
+
+            col.append(cmap(col1))
+        c+=1
+
+    nodes_array= np.array(nodes_list)
+
+
+
+    for i in range(len(nodes_array)):
+
+        plt.scatter(nodes_array[i][2], nodes_array[i][1], c=col[i], marker='o')
+
+    m.set_array(np.array([min(von_misses_stresses), max(von_misses_stresses)]))
+    fig.colorbar(m)
+    ax.set_title('Von Mises stress distribution')
     ax.set_ylabel('y (m)')
     ax.set_xlabel('z (m)')
     plt.show()
 
-#nodes_cross_section(X_nodes[0])
-#nodes_cross_section()
+
+def cross_section_max_shear_stress(x_coord):
+    fig = plt.gcf()
+    ax = fig.gca()
+    ax.invert_xaxis()
+    cmap = plt.get_cmap("jet")
+    m = cm.ScalarMappable(cmap=plt.get_cmap("jet"))
+    col=[]
+    nodes_list=[]
+    c=0
+    for node in list(point_for_element):
+        if abs(node[0]-x_coord)<15 and (abs(node[1]+node[2])>5 or abs(node[1]-node[2])==0) and int(node[1])!=46 and abs(node[1]+46.277)>2:
+            nodes_list.append(list(node))
+            col1 = normal(shear_stresses[c], min(shear_stresses), max(shear_stresses))
+
+            col.append(cmap(col1))
+        c+=1
+
+    nodes_array= np.array(nodes_list)
+
+
+
+    for i in range(len(nodes_array)):
+
+        plt.scatter(nodes_array[i][2], nodes_array[i][1], c=col[i], marker='o')
+
+    m.set_array(np.array([min(shear_stresses), max(shear_stresses)]))
+    fig.colorbar(m)
+    ax.set_title('Shear stress distribution')
+    ax.set_ylabel('y (m)')
+    ax.set_xlabel('z (m)')
+    plt.show()
+
+cross_section_max_von_misses(point_for_element[2390][0]) #the element with max von mises stress is 2391
+
+cross_section_max_shear_stress(point_for_element[2389][0]) #the element with max shear stress is 2389
+
+
+
