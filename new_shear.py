@@ -274,7 +274,7 @@ class section():
 
     def show(self):
         plt.scatter(self.sc,0)
-        plt.scatter(self.z, self.y, c=self.q, cmap="seismic", vmin=-self.m, vmax=self.m)
+        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.m, vmax=self.m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -287,5 +287,5 @@ class section():
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 1, 1, 1, 1, 1)
+s = section(0.0001, 200000, -20000, -2000, 8000, -1000)
 s.show()
