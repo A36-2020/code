@@ -75,12 +75,3 @@ if  __name__ == '__main__':
     print(Moment_of_inertia())
     print(Moment_of_Inertia_triangle())
     print(Moment_of_Inertia_semicirc())
-
-
-
-
-
-
-
-
-
