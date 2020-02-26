@@ -60,6 +60,8 @@ def simpson(F,z,x):
     b = z[-1]
     CoP = []
     Q = []
+    Nx = len(x)
+    Nz = len(z)
     dz = abs(float((b-a)/2))
     for i in np.arange(Nx):
         q = []
@@ -76,6 +78,14 @@ def simpson(F,z,x):
         Q.append(int_f)
         CoP.append(int_fz/int_f)
     return Q,CoP
+
+# integration_unittest
+
+# f_test = np.array(([1,2,3],[10,11,12]))
+# z_test = np.array((1,2,3))
+# x_test = np.array((1,2,3))
+# Q_test,CoP_test = simpson(f_test,z_test,x_test)
+# print(Q_test,CoP_test)
 
 def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
     #This function interpolates the values for Q and the z-coord of q on a list of xcoords.
@@ -133,8 +143,8 @@ interpolated_xlist = interpolated_xlist[1:]
 
 
 Qthingy,CoP = simpson(arr,z,x)
-print("Qthingy:")
-print(Qthingy)
+# print("Qthingy:")
+# print(Qthingy)
 
 a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
@@ -180,8 +190,9 @@ def moments_x_Q(q,qx,x):
 Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q = Mz_Q(x1,x2,x3,Qthingy,x,Ca,CoP)
 
 # print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
-
-def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3):
+# print(Izz_total,Iyy_total)
+print(E,Izz_total,Iyy_total)
+def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3):
 
 
     #Matrix with unknowns (left part)
@@ -227,14 +238,14 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     #Row 7
     bm[6][0] = (x2-x1)**3
     bm[6][6] = m.sin(theta/180.*m.pi)*(xa/2)**3
-    bm[6][7] = 6*E*Izz_total*x1
-    bm[6][8] = 6*E*Izz_total
+    bm[6][7] = 6*E*Iyy_total*x1
+    bm[6][8] = 6*E*Iyy_total
     #Row 8
     bm[7][0] = (x3-x1)**3
     bm[7][1] = (x3-x2)**3
     bm[7][6] = m.sin(theta/180.*m.pi)*(x3-(x2-xa/2))**3
-    bm[7][7] = 6*E*Izz_total*x1
-    bm[7][8] = 6*E*Izz_total
+    bm[7][7] = 6*E*Iyy_total*x1
+    bm[7][8] = 6*E*Iyy_total
     #Row 9
     bm[8][9]= x1
     bm[8][10]= 1
@@ -262,9 +273,9 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha/2 - P*m.sin(theta/180.*m.pi)*ca + np.sum(Mx_Q)
     bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
     bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
-    bm_knowns[5] = -1/(6*E*Izz_total)*np.sum(Mz_Q_x1**3)+d1
+    bm_knowns[5] = -1/(6*E*Iyy_total)*np.sum(Mz_Q_x1**3)+d1
     bm_knowns[6] = -np.sum(Mz_Q_x2**3)
-    bm_knowns[7] = -np.sum(Mz_Q_x3**3)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3+6*E*Izz_total
+    bm_knowns[7] = -np.sum(Mz_Q_x3**3)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3+6*E*Iyy_total
     bm_knowns[8] = 0
     bm_knowns[9] = 0
     bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3
@@ -285,7 +296,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz
     C2z = variables[10]
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
 # print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
-R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
+R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
 print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
 def shear_force_in_y_calculations(R1y, x1, R2y, x2, R3y, x3, A, P, xa, Qvalues, la, xsteps):
