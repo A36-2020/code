@@ -127,18 +127,20 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         qzlist.append(interpolated_qz)
     return qlist, qzlist
 
+interpolated_xlist_len = 400
+interpolated_xlist  = np.zeros(interpolated_xlist_len)
+for j in range (interpolated_xlist_len):
+    thetax = (j/interpolated_xlist_len)*m.pi
+    thetax2 = ((j+1)/interpolated_xlist_len)*m.pi
 
-interpolated_xlist = np.linspace(0,1,400)
-interpolated_xlist = interpolated_xlist[1:]
+    xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
+    interpolated_xlist[j] = xPos/la
+
 
 
 Qthingy,CoP = simpson(arr,z,x)
-print("Qthingy:",np.sum(np.asarray(Qthingy)))
-plt.scatter(x[0],Qthingy)
-plt.show()
-a,b = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
-print("Sum of interpolated data:",np.sum(np.asarray(a)))
+interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
@@ -181,14 +183,13 @@ def moments_x_Q(q,qx,x):
     return float(momentsum)
 
 
-Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q = Mz_Q(x1,x2,x3,Qthingy,x,Ca,CoP)
+Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q = Mz_Q(x1,x2,x3,interpolated_qvalues,scaled_interpolated_xlist,Ca,interpolated_CoPs)
 #print("Moments:")
 #print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
 
 def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3):
 
     #Matrix with unknowns (left part)
-
     bm = np.zeros((11,11))
     #Row 1:
     #Sum of forces in y
@@ -209,6 +210,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[2][4] = 0
     bm[2][5] = 0
     bm[2][6] = - m.cos(theta/180.*m.pi)*ha/2 + m.sin(theta/180.*m.pi)*ha/2
+
     #Row 4
     #Sum of moments around y
     bm[3][3] = x1
@@ -270,10 +272,6 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm_knowns[9] = 0
     bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3/(6*E*Izz_total)
 
-    print("BM:")
-    print(bm)
-    print("BM_knowns:")
-    print(bm_knowns)
 
     variables = np.linalg.solve(bm,bm_knowns)
     R1y = variables[0]
@@ -288,10 +286,11 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     C1z = variables[9]
     C2z = variables[10]
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
-print("")
-print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,sum(Mx_Q),sum(Mz_Q_x1),sum(Mz_Q_x2),sum(Mz_Q_x3))
-print("")
-R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Iyy_total,Izz_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
+
+#print("")
+#print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,sum(Mx_Q),sum(Mz_Q_x1),sum(Mz_Q_x2),sum(Mz_Q_x3))
+#print("")
+R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3)
 print("SOLUTIONS")
 print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z)
 
@@ -368,9 +367,16 @@ def shear_force_in_z_calculations(R1x, x1, R2x, x2, R3x, x3, A, P, xa, la, xstep
     shearvalues = shearvalues[1:]
     return shearvalues, interpolated_xlist
 
+
 shear_y, xcoords = shear_force_in_y_calculations(R1y,x1,R2y,x2,R3y,x3,A,P,xa,Qthingy,la,200)
-shear_z,xcoords = shear_force_in_z_calculations(R1z, x1, R2z, x2, R3z, x3, A, P, xa, la, 200)
+shear_z,xcoords2 = shear_force_in_z_calculations(R1z, x1, R2z, x2, R3z, x3, A, P, xa, la, 200)
 internal_moments_in_z = internal_moment_calculations(shear_z, xcoords)
 internal_moments_in_y = internal_moment_calculations(shear_y, xcoords)
-plt.plot(xcoords,internal_moments_in_z)
-plt.show()
+#print("")
+#print(internal_moments_in_z)
+#print(internal_moments_in_y)
+#print("")
+#plt.plot(xcoords,shear_z)
+#plt.show()
+#plt.plot(xcoords,internal_moments_in_z)
+#plt.show()
