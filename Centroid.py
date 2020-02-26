@@ -99,6 +99,14 @@ ycentroidtotal = ytimesA/areasum
 
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
+
+    print(sum(Area))
+    print("----------------------")
+    print(z_centroids_straight)
+    print(y_centroids_straight)
+    print(z_centroids_semicirc)
+    print(y_centroids_semicirc)
+
     #print(z_centroids_straight)
     #print(y_centroids_straight)
     #print(z_centroids_semicirc)
@@ -141,5 +149,6 @@ plt.show()
 #centroiddiff = zcentroidtotal+crosssection.zc
 #centroiddiffperc = centroiddiff/crosssection.zc * 100
 #print(centroiddiff, centroiddiffperc)
+
 
     
