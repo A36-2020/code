@@ -354,9 +354,8 @@ for i in range(len(nodes_LE)):
         if all_nodes[nodes_LE[i]][0]==all_nodes[nodes_TE[j]][0]:
             pairs_LE_TE.append([nodes_LE[i], nodes_TE[j]])
 
-print(all_nodes_deflections[pairs_LE_TE[0][1]][1])
 
-d=102.5
+"""Plotting the twist angle"""
 def plot_twist():
     twist_along_x=[]
     x_coords=[]
@@ -376,8 +375,8 @@ def plot_twist():
 
     plt.show()
 
-plot_twist()
-plotting_deflection_of_hingeline_y()
+#plot_twist()
+#plotting_deflection_of_hingeline_y()
 
 #def plotting_twist():
 
