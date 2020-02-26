@@ -2,6 +2,7 @@ from nbconvert.exporters import notebook
 import xlrd
 from mpl_toolkits import mplot3d
 import numpy as np
+import math as m
 import matplotlib.tri as mtri
 import scipy as sp
 import pylab as pl
@@ -257,7 +258,7 @@ def cross_section_max_shear_stress(x_coord):
     ax.set_xlabel('z (m)')
     plt.show()
 
-#cross_section_max_von_misses(point_for_element[2390][0]) #the element with max von mises stress is 2391
+cross_section_max_von_misses(point_for_element[2390][0]) #the element with max von mises stress is 2391
 
 #cross_section_max_shear_stress(point_for_element[2389][0]) #the element with max shear stress is 2389
 
@@ -270,6 +271,7 @@ def plotting_deflection_of_hingeline_y():
         if all_nodes[i][1]==0 and all_nodes[i][2]==0:
             nodes_on_hingeline_y.append(all_nodes_deflections[i][1])
             nodes_on_hingeline_x.append(all_nodes_deflections[i][0])
+
 
     nodes_on_hingeline_y=np.array(nodes_on_hingeline_y)
     nodes_on_hingeline_x = np.array(nodes_on_hingeline_x)
@@ -324,4 +326,58 @@ for i in range(len(all_nodes)):
 #print(all_nodes_deflections[c], c)
 min_deflec=all_nodes[c]
 
+"""Saving nodes on the leading edge"""
+nodes_on_LE_z=[]
+nodes_on_LE_y=[]
+nodes_LE=[]
+for i in range(len(all_nodes)):
+    if all_nodes[i][1] == 0 and all_nodes[i][2] == max(Z_nodes):
+        nodes_LE.append(i)
+        nodes_on_LE_y.append(all_nodes_deflections[i][1])
+        nodes_on_LE_z.append(all_nodes_deflections[i][2])
+
+"""Saving nodes on the trailing edge"""
+nodes_on_TE_z=[]
+nodes_on_TE_y=[]
+nodes_TE=[]
+for i in range(len(all_nodes)):
+    if all_nodes[i][1] == 0 and all_nodes[i][2] == min(Z_nodes):
+        nodes_TE.append(i)
+        nodes_on_TE_y.append(all_nodes_deflections[i][1])
+        nodes_on_TE_z.append(all_nodes_deflections[i][2])
+
+"""Saving pairs of points LE-TE to draw chord and extract twist angle"""
+pairs_LE_TE=[]
+
+for i in range(len(nodes_LE)):
+    for j in range(len(nodes_TE)):
+        if all_nodes[nodes_LE[i]][0]==all_nodes[nodes_TE[j]][0]:
+            pairs_LE_TE.append([nodes_LE[i], nodes_TE[j]])
+
+print(all_nodes_deflections[pairs_LE_TE[0][1]][1])
+
+d=102.5
+def plot_twist():
+    twist_along_x=[]
+    x_coords=[]
+    for i in range(len(pairs_LE_TE)):
+        twist_along_x.append(m.atan(all_nodes_deflections[pairs_LE_TE[i][0]][1]/all_nodes_deflections[pairs_LE_TE[i][0]][2]))
+        x_coords.append(all_nodes[pairs_LE_TE[i][0]][0])
+
+    fig = plt.gcf()
+    ax = fig.gca()
+
+    for i in range(len(pairs_LE_TE)):
+        plt.scatter(x_coords[i], twist_along_x[i], c="b", marker='o')
+
+    ax.set_ylabel('twist')
+    ax.set_xlabel('x (mm)')
+    ax.set_title('Twist along the hinge line')
+
+    plt.show()
+
+plot_twist()
 plotting_deflection_of_hingeline_y()
+
+#def plotting_twist():
+
