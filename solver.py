@@ -14,8 +14,8 @@ Ca = 0.505
 la = 1.611
 G = 28.0
 SC = -0.0816
-d1 = 0
-d3 = 0
+#d1 = 0
+#d3 = 0
 
 Izz_total, Iyy_total = Moment_of_inertia()
 J = calcJ()
@@ -311,4 +311,21 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     C1z = variables[9]
     C2z = variables[10]
     CT = variables[11]
-    return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT
+    return R1y[0],R2y[0],R3y[0],R1z[0],R2z[0],R3z[0],A[0],C1y[0],C2y[0],C1z[0],C2z[0],CT[0]
+
+
+vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
+print(vals)
+input()
+
+def maucaly(x, xn):
+    return x if x >= xn else 0
+
+def _shear(x, one, two, three, A, P, C1, C2):
+    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3-A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3+P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+
+shear = np.vectorize(_shear)
+a  = np.linspace(0,la,1000)
+plt.plot(a, shear(a, vals[0], vals[1], vals[2], vals[6], P, vals[7], vals[8]))
+plt.axis('equal')
+plt.show()
