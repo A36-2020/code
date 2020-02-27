@@ -4,11 +4,15 @@ import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt
 from integrate import integrate, integrate_2
+from Centroid import z_centroids_semicirc as angles
+from Centroid import zcentroidtotal as zbar
 
 c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
+zbar = 0.2164
+off = zbar-r
 
 def _t(s):
     if s <= 2*l+r*pi:
@@ -70,9 +74,9 @@ y = np.vectorize(_y)
 
 
 def _arm(s):
-    if s <= 2*l:
+    if s < 2*l:
         return r*c/l
-    elif s <= 2*l+r*pi:
+    elif s < 2*l+r*pi:
         return r
     else:
         return 0
@@ -110,23 +114,26 @@ line_yy = np.vectorize(_line_yy)
 def _line_zz(s):
     val = 0
     if s <= l:
-        return val + F100.tsk*(c/2/l*s**2)
+        return val + F100.tsk*(c/2/l*s**2-off*s)
     else:
-        val += F100.tsk*(c/2/l*l**2)
+        val += F100.tsk*(c/2/l*l**2-off*l)
 
     s -= l
 
     if s <= l:
-        return val + F100.tsk*(c*s-c/2/l*s**2)
+        return val + F100.tsk*(c*s-c/2/l*s**2-off*s)
     else:
-        val += F100.tsk*(c*l-c/2*l)
+        val += F100.tsk*(c*l-c/2*l-off*l)
 
     s -= l
 
     if s <= (pi*r):
-        return val + F100.tsk * r*r*(cos(s/r)-1)
+        return val + F100.tsk * (r*r*(-1*cos(s/r)+1)-off*s)
     else:
-        return val + F100.tsk * r*r*(cos(pi)-1)
+        val += F100.tsk * (r*r*(-cos(pi)+1)-off*pi*r)
+
+    s -= pi*r
+    return val-off*s*F100.tsp
 
 line_zz = np.vectorize(_line_zz)
 
@@ -151,10 +158,12 @@ def _sumy(s):
 
     if s < r*pi:
         theta = s/r
-        if theta > pi/4:
-            val += F100.Ast*sin(pi/4)*r
+        a1 = angles[2]
+        a2 = angles[4]
+        if theta > a1:
+            val += F100.Ast*cos(a1)*r
         if theta > 3*pi/4:
-            val -= F100.Ast*sin(pi/4)*r
+            val -= F100.Ast*cos(a1)*r
 
     return val
         
@@ -164,35 +173,43 @@ def _sumz(s):
     val = 0
     if s < l:
         n = floor(s/(l/5))
-        y = (1+(n-1)/2)*((l/5))*c/l
+        y = (1+(n-1)/2)*((l/5))*c/l-off
         return val + F100.Ast * y * n
     else:
-        val += 4*F100.Ast*(c/2)
+        val += 4*F100.Ast*(c/2-off)
 
     s -= l
     if s < l:
         n = floor(s/(l/5))
         y = (1+(n-1)/2)*((l/5))*c/l
-        y = c-y
+        y = c-y-off
         return val + F100.Ast * y * n
     else:
-        val += 4*F100.Ast*(c/2)
+        val += 4*F100.Ast*(c/2-off)
     s -= l
 
     theta = s/r
-    if theta > pi/4:
-        val -= F100.Ast*cos(pi/4)*r
+    a1 = angles[2]
+    a2 = angles[4]
+    if theta > a1:
+        val -= F100.Ast*(sin(a1)*r+off)
     if theta > pi/2:
-        val -= F100.Ast*r
-    if theta > 3*pi/4:
-        val -= F100.Ast*cos(pi/4)*r
+        val -= F100.Ast*(r+off)
+    if theta > a2:
+        val -= F100.Ast*(sin(a2)*r+off)
 
     return val
         
 sumz = np.vectorize(_sumz)
 
+a = np.linspace(0,r+r+r*pi+l+l)
+plt.plot(a,  sumz(a)+line_zz(a))
+plt.plot([a[0], a[-1]], [0,0])
+plt.show()
+
 Iyy, Izz = Moment_of_Inertia.Moment_of_inertia()
 zbar = 0.204
+Acs = 0.002
 print(Iyy, Izz)
 
 class section():
@@ -201,10 +218,29 @@ class section():
         endt = int(2*l/ds)
         endl = endt + int(r*pi/ds)
 
+
         self.s = np.arange(0,2*l+r*pi+2*r,ds)
+
+        unit = line_yy(self.s)
+        ut = unit[:endt]
+        ul = unit[endt:endl]
+        up = unit[endl:]
+
+        ubt = -1*(integrate_2(ut, ds)/F100.tsk-integrate_2(up, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
+        ubl = -1*(integrate_2(ul, ds)/F100.tsk+integrate_2(up, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
+        
+        ut += ubt 
+        ul += ubl 
+        up = up + ubl - ubt 
+        u = np.hstack((ut,ul,up))
+
+
+        self.sc = -1*integrate_2(arm(self.s)*(u/Izz),ds)
+        print(self.sc+r)
+
         self.qsy = Vy*(line_yy(self.s)+sumy(self.s))/Iyy
         self.qsz = Vz*(line_zz(self.s)+sumz(self.s))/Izz
-        self.qs = self.qsz + self.qsy
+        self.qs = self.qsy + self.qsz
 
         qt = self.qs[:endt]
         ql = self.qs[endt:endl]
@@ -213,9 +249,13 @@ class section():
         qbt = -1*(integrate_2(qt, ds)/F100.tsk-integrate_2(sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
         qbl = -1*(integrate_2(ql, ds)/F100.tsk+integrate_2(sp, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
 
-        qt += qbt
-        ql += qbl
-        sp = sp + qbl - qbt
+        self.qsz = Vz*(line_zz(self.s)+0*sumz(self.s))/Izz
+        qbz = -1*(integrate_2(self.qsz[:endl],ds)/F100.tsk)/((2*l+r*pi)/F100.tsk)
+
+        qt += qbt 
+        ql += qbl 
+        sp = sp + qbl - qbt 
+
 
         # Shear flow over, now torque
         A = np.array([[1,1],[0,0]])
@@ -241,15 +281,15 @@ class section():
         self.sig = sigy+sigz
 
         # Visualisation
-        self.z = z(self.s)
+        self.z = -(z(self.s)+r)
         self.y = y(self.s)
 
 
         m = np.max(np.abs(q))
         
         # Sanity check bro
-        print((q[endt-4]-q[endt+4]+q[-1])/m)
-        print((-q[0]+q[endl-4]-q[endl+4])/m)
+        print((q[endt-9]-q[endt+9]+q[-1])/m)
+        print((-q[0]+q[endl-9]-q[endl+9])/m)
 
         self.q = q
         self.m = m
@@ -257,17 +297,35 @@ class section():
         self.mises = np.sqrt(np.square(self.q)+3*np.square(self.q/t(self.s)))
 
     def show(self):
-        plt.scatter(self.z, self.y, c=self.q, vmin=-self.m, vmax=self.m)
+        plt.title("Shear Flow [N/m]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
+        plt.scatter(-self.sc-r,0)
+        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.m, vmax=self.m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
+
+        
+        plt.title("Direct Stress [$N/m^2$]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
         plt.scatter(self.z, self.y, c=self.sig)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
+
+
+        plt.title("Mises Stress [$N/m^2$]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
         plt.scatter(self.z, self.y, c=self.mises)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 0, -1, 0, 0, 1)
+s = section(0.0001, 2000, 000, 0000, 00, 000)
+s.show()
