@@ -17,6 +17,7 @@ SC = -0.0816
 #d3 = 0
 
 Izz_total, Iyy_total = Moment_of_inertia()
+print(Iyy_total,Izz_total)
 J = calcJ()
 
 
@@ -328,7 +329,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT
 
 
-vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
+vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Iyy_total,Izz_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
 print(vals)
 
 def maucaly(x, xn):
@@ -338,7 +339,7 @@ def maucaly0(x, xn):
     return np.where(x>xn,1,0)
 
 def deflection(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
 
 def shear(x, one, two, three, A, P, C1, C2):
     return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
