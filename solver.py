@@ -146,14 +146,15 @@ for j in range (interpolated_xlist_len):
 
 
 
+
 Qthingy,CoP = simpson(arr,z,x)
-
+print(sum(Qthingy))
 interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
-
+print(sum(interpolated_qvalues))
 interpolated_xlist = [interpolated_xlist]
 
-#for i in range(len(interpolated_qvalues)):
-    #interpolated_qvalues[i] = 0
+for i in range(len(interpolated_qvalues)):
+    interpolated_qvalues[i] = 0
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:

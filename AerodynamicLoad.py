@@ -134,7 +134,7 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         qzlist.append(interpolated_qz)
     return qlist, qzlist
 
-interpolated_xlist_len = 1000
+interpolated_xlist_len = 100000
 interpolated_xlist  = np.zeros(interpolated_xlist_len)
 for j in range (interpolated_xlist_len):
     thetax = (j/interpolated_xlist_len)*m.pi
@@ -148,7 +148,7 @@ for j in range (interpolated_xlist_len):
 Qthingy,CoP = simpson(arr,z,x)
 
 interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
-
+print(sum(interpolated_qvalues))
 interpolated_xlist = [interpolated_xlist]
 
 #for i in range(len(interpolated_qvalues)):
@@ -449,7 +449,7 @@ integrated_moments = deflection_integration(internal_moments_in_y,xcoordslist)
 
 
 
-
+'''
 
 def maucaly(x, xn):
     return np.where(x>xn,x-xn,0)
@@ -474,4 +474,4 @@ plt.show()
 plt.plot(a, moment(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
 plt.plot(a, deflection(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
-plt.show()
+plt.show()'''
