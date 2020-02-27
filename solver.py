@@ -151,9 +151,9 @@ interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xl
 
 interpolated_xlist = [interpolated_xlist]
 
-#for i in range(len(interpolated_qvalues)):
-#    interpolated_qvalues[i] = 0
-#print(interpolated_qvalues)
+for i in range(len(interpolated_qvalues)):
+    interpolated_qvalues[i] = 0
+print(interpolated_qvalues)
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
@@ -334,11 +334,24 @@ print(vals)
 def maucaly(x, xn):
     return np.where(x>xn,x-xn,0)
 
-def shear(x, one, two, three, A, P, C1, C2):
+def maucaly0(x, xn):
+    return np.where(x>xn,1,0)
+
+def deflection(x, one, two, three, A, P, C1, C2):
     return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+
+def shear(x, one, two, three, A, P, C1, C2):
+    return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
+
+def moment(x, one, two, three, A, P, C1, C2):
+    return one*maucaly(x,x1)**1+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 
 a  = np.linspace(0,la,1000)
 
 #-47000, 65000, -18000
 plt.plot(a, shear(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.show()
+plt.plot(a, moment(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.show()
+plt.plot(a, deflection(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
