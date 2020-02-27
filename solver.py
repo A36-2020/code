@@ -337,7 +337,7 @@ def maucaly0(x, xn):
     return np.where(x>xn,1,0)
 
 def deflectiony(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
 
 def sheary(x, one, two, three, A, P, C1, C2):
     return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
@@ -347,7 +347,7 @@ def momenty(x, one, two, three, A, P, C1, C2):
 
 
 def deflectionz(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+    return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
 
 def shearz(x, one, two, three, A, P, C1, C2):
     return +one*maucaly0(x,x1)+A*m.cos(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.cos(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
@@ -355,6 +355,11 @@ def shearz(x, one, two, three, A, P, C1, C2):
 def momentz(x, one, two, three, A, P, C1, C2):
     return +one*maucaly(x,x1)**1+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**+two*maucaly(x,x2)**1-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 a  = np.linspace(0,la,1000)
+
+def twist(x, oney, twoy, threy, A, P, C):
+    s = -SC
+    t = theta/180*m.pi
+    return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3))
 
 #-47000, 65000, -18000
 plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
@@ -369,4 +374,7 @@ plt.show()
 plt.plot(a, momenty(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
 plt.show()
 plt.plot(a, deflectiony(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.show()
+
+plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
 plt.show()
