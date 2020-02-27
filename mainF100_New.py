@@ -82,7 +82,7 @@ aileron.addbcss(x3,0.,-ha/2.,m.pi/2-theta,0)
 aileron.addbcss(x2-xa/2.,ha/2.,0,m.pi/2.-theta,0)
 
 """"Define your applied loading; see manual for explanations."""
-aileron.addfpl(x2+xa/2.,ha/2.,0,m.pi/2.-theta,P)
+aileron.addfpl(x2+xa/2.,ha/2.,0,m.pi/2.-theta,-P)
 
 ### Primary functions
 """ The following line computes the deflections. If you do not want to include the aerodynamic loading, simply write
@@ -151,6 +151,7 @@ _ = aileron.RHS             # Right-hand-side vector
 
 _ = aileron.sol.coef        # Resulting coefficients, collected in bar(alpha) (and thus include both the 'boundary' and 'external' coefficients.
 
+print(aileron.LHS, aileron.RHS, aileron.sol.coef)
 ######################## Part V - Stress calculations #######################################
 ### Create the stress state object, which will contain information about the stresses of the aileron
 Stressobject = Stress.Stressstate(crosssection)
