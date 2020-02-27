@@ -12,10 +12,9 @@ Nz = 81
 Nx = 41
 Ca = 0.505
 la = 1.611
-G = 28.0
 SC = -0.0816
-d1 = 0
-d3 = 0
+#d1 = 0
+#d3 = 0
 
 Izz_total, Iyy_total = Moment_of_inertia()
 J = calcJ()
@@ -286,16 +285,16 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 
     bm_knowns[0] = P*m.sin(theta/180.*m.pi)-np.sum(np.asarray(Qthingy))
     bm_knowns[1] = P*m.cos(theta/180.*m.pi)
-    bm_knowns[2] = P*m.cos(theta/180.*m.pi)*ha/2 - P*m.sin(theta/180.*m.pi)*ha/2 + np.sum(Mx_Q)
-    bm_knowns[3] = -P*m.cos(theta/180.*m.pi)*(x2+xa/2)
-    bm_knowns[4] = -P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
-    bm_knowns[5] = 1/(6*E*Iyy_total)*np.sum(Mz_Q_x1)+d1
+    bm_knowns[2] = -P*m.cos(theta/180.*m.pi)*ha/2 + P*m.sin(theta/180.*m.pi)*ha/2 + np.sum(Mx_Q)
+    bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
+    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
+    bm_knowns[5] = 1/(6*E*Iyy_total)*np.sum(Mz_Q_x1)+d1*m.cos(theta/180.*m.pi)
     bm_knowns[6] = np.sum(Mz_Q_x2)/(6*E*Iyy_total)
-    bm_knowns[7] = np.sum(Mz_Q_x3)/(6*E*Iyy_total)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3*1/(6*E*Iyy_total)+d3
-    bm_knowns[8] = 0
+    bm_knowns[7] = np.sum(Mz_Q_x3)/(6*E*Iyy_total)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3*1/(6*E*Iyy_total)+d3*m.cos(theta/180.*m.pi)
+    bm_knowns[8] = -d1*m.sin(theta/180.*m.pi)
     bm_knowns[9] = 0
-    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3/(6*E*Izz_total)
-    bm_knowns[11] = np.sum(T_A)
+    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3/(6*E*Izz_total)-d3*m.sin(theta/180.*m.pi)
+    bm_knowns[11] = -np.sum(T_A)
 
 
     variables = np.linalg.solve(bm,bm_knowns)

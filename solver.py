@@ -204,7 +204,6 @@ Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q,T_A = Mz_Q(x1,x2,x3,xA,interpolated_qvalue
 #print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
 
 def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A):
-
     #Matrix with unknowns (left part)
     bm = np.zeros((12,12))
     #Row 1:
@@ -278,8 +277,6 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[11][0] = (ha/2-SC)/(G*J)
     bm[11][11] = 1
 
-    print(bm)
-
     #Matrix of knowns (right part)
 
     bm_knowns = np.zeros((12,1))
@@ -297,7 +294,6 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3/(6*E*Izz_total)
     bm_knowns[11] = np.sum(T_A)
 
-
     variables = np.linalg.solve(bm,bm_knowns)
     R1y = variables[0]
     R2y = variables[1]
@@ -312,3 +308,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     C2z = variables[10]
     CT = variables[11]
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT
+
+R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
+print("SOLUTIONS")
+print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT)
