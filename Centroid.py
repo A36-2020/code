@@ -99,6 +99,14 @@ ycentroidtotal = ytimesA/areasum
 
 if __name__ == '__main__':
     print(zcentroidtotal, ycentroidtotal)
+
+    print(sum(Area))
+    print("----------------------")
+    print(z_centroids_straight)
+    print(y_centroids_straight)
+    print(z_centroids_semicirc)
+    print(y_centroids_semicirc)
+
     #print(z_centroids_straight)
     #print(y_centroids_straight)
     #print(z_centroids_semicirc)
@@ -126,6 +134,7 @@ plt.plot(zspar, yspar, color="black", linewidth=0.1)
 circle1 = Wedge((0.5*h,0), 0.5*h, 90, 270, color="black", fill = False)
 fig = plt.gcf()
 ax = fig.gca()
+
 ax.add_artist(circle1)
 fig.set_size_inches(8,3)
 ax.set_ylabel('y (m)')
@@ -140,5 +149,6 @@ plt.show()
 #centroiddiff = zcentroidtotal+crosssection.zc
 #centroiddiffperc = centroiddiff/crosssection.zc * 100
 #print(centroiddiff, centroiddiffperc)
+
 
     

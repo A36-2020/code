@@ -2,11 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import F100
+import material
+import geometry
+from Moment_of_Inertia import Moment_of_inertia
 
-
-def deformation(x_vals):
+def deformation(x_vals, Inertia):
+    Inertia = Moment_of_inertia()[0]
+    print(Inertia)
     """ x is a numpy array, returns deflection due to flex on every x as np.array
-        as well as the curvature on every position"""
+        as well as the Moment times stifness and shear force on every position
+        also returns F1y, F2y, F3y"""
     l1 = F100.x2 - F100.x1
     l2 = F100.x3 - F100.x2
 
@@ -15,10 +20,10 @@ def deformation(x_vals):
 
     A = np.zeros((4, 4))
 
-    A[0, :] = [(-l1) ** 3, +((-l1) ** 2), -l1, 0]
+    A[0, :] = [(-l1) ** 3, ((-l1) ** 2), -l1, 0]
     A[1, :] = [0, l2 ** 2, l2, l2 ** 3]
-    A[2, :] = [6 * (-l1), 2 * (-l1), 0, 0]
-    A[3, :] = [0, 2 * l2, 0, 6 * l2]
+    A[2, :] = [6 * (-l1), 2, 0, 0]
+    A[3, :] = [0, 2, 0, 6 * l2]
 
     b = [F100.d1, F100.d3, 0, 0]
 
@@ -52,14 +57,25 @@ def deformation(x_vals):
     for i in x_vals:
         defs.append(deformation(i))
 
-    max_curv = 2 * x[1]
-    # we know curvature is max at Hinge 2, so and it looks like a tipi is 0 after
+    m_max = Inertia * material.E * 2*x[1]
+    print(l1, l2, m_max)
+    F1y = m_max/(l1)
+    F3y = m_max/(l2)
+    F2y = (F1y+F3y) * -1
+    defs = np.array(defs)
 
-    return np.array(defs)
+    return (defs, np.gradient(np.gradient(defs*Inertia*material.E, x_vals), x_vals) ,np.gradient(np.gradient(np.gradient(defs*Inertia*material.E, x_vals), x_vals), x_vals), F1y, F2y, F3y)
 
-l = np.linspace(0, F100.la, 100)
-a = deformation(l)
-plt.plot(l, a)
-plt.show()
-plt.plot(l,np.gradient(np.gradient(a, l), l))
+l = np.linspace(0, F100.la, 10000)
+a = deformation(l, 0.0002)
+print(a[3], a[4], a[5])
+plt.subplot(212)
+plt.plot(l, a[0])
+
+plt.subplot(221)
+plt.plot(l, a[1])
+
+plt.subplot(222)
+plt.plot(l, a[2])
+
 plt.show()
