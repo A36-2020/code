@@ -164,10 +164,12 @@ def q_y(x,p):
     r = 0
     i = 0
     while s <= (x-dx):
-        r += dx*Qthingy[i]*(x-s)**p
+        r += Qthingy[i]*(x-s)**p
         s += dx
         i += 1
     return r
+
+print(q_y(la,0))
 
 q_y = np.vectorize(q_y)
 
