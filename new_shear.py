@@ -4,13 +4,14 @@ import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt
 from integrate import integrate, integrate_2
+from Centroid import z_centroids_semicirc as angles
+from Centroid import zcentroidtotal as zbar
 
 c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
-
-zbar = 0.2148
+zbar = 0.2164
 off = zbar-r
 
 def _t(s):
@@ -73,9 +74,9 @@ y = np.vectorize(_y)
 
 
 def _arm(s):
-    if s <= 2*l:
+    if s < 2*l:
         return r*c/l
-    elif s <= 2*l+r*pi:
+    elif s < 2*l+r*pi:
         return r
     else:
         return 0
@@ -127,9 +128,9 @@ def _line_zz(s):
     s -= l
 
     if s <= (pi*r):
-        return val - F100.tsk * (r*r*(cos(s/r)-1)+off*s)
+        return val + F100.tsk * (r*r*(-1*cos(s/r)+1)-off*s)
     else:
-        val -= F100.tsk * (r*r*(cos(pi)-1)+off*pi*r)
+        val += F100.tsk * (r*r*(-cos(pi)+1)-off*pi*r)
 
     s -= pi*r
     return val-off*s*F100.tsp
@@ -157,10 +158,12 @@ def _sumy(s):
 
     if s < r*pi:
         theta = s/r
-        if theta > pi/4:
-            val += F100.Ast*sin(pi/4)*r
+        a1 = angles[2]
+        a2 = angles[4]
+        if theta > a1:
+            val += F100.Ast*cos(a1)*r
         if theta > 3*pi/4:
-            val -= F100.Ast*sin(pi/4)*r
+            val -= F100.Ast*cos(a1)*r
 
     return val
         
@@ -186,16 +189,23 @@ def _sumz(s):
     s -= l
 
     theta = s/r
-    if theta > pi/4:
-        val -= F100.Ast*(cos(pi/4)*r+off)
+    a1 = angles[2]
+    a2 = angles[4]
+    if theta > a1:
+        val -= F100.Ast*(sin(a1)*r+off)
     if theta > pi/2:
         val -= F100.Ast*(r+off)
-    if theta > 3*pi/4:
-        val -= F100.Ast*(cos(pi/4)*r+off)
+    if theta > a2:
+        val -= F100.Ast*(sin(a2)*r+off)
 
     return val
         
 sumz = np.vectorize(_sumz)
+
+a = np.linspace(0,r+r+r*pi+l+l)
+plt.plot(a,  sumz(a)+line_zz(a))
+plt.plot([a[0], a[-1]], [0,0])
+plt.show()
 
 Iyy, Izz = Moment_of_Inertia.Moment_of_inertia()
 zbar = 0.204
@@ -211,8 +221,22 @@ class section():
 
         self.s = np.arange(0,2*l+r*pi+2*r,ds)
 
-        self.sc = -1*integrate_2(arm(self.s)*(line_yy(self.s))/Iyy,ds)
-        print(self.sc)
+        unit = line_yy(self.s)
+        ut = unit[:endt]
+        ul = unit[endt:endl]
+        up = unit[endl:]
+
+        ubt = -1*(integrate_2(ut, ds)/F100.tsk-integrate_2(up, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
+        ubl = -1*(integrate_2(ul, ds)/F100.tsk+integrate_2(up, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
+        
+        ut += ubt 
+        ul += ubl 
+        up = up + ubl - ubt 
+        u = np.hstack((ut,ul,up))
+
+
+        self.sc = -1*integrate_2(arm(self.s)*(u/Izz),ds)
+        print(self.sc+r)
 
         self.qsy = Vy*(line_yy(self.s)+sumy(self.s))/Iyy
         self.qsz = Vz*(line_zz(self.s)+sumz(self.s))/Izz
@@ -257,15 +281,15 @@ class section():
         self.sig = sigy+sigz
 
         # Visualisation
-        self.z = z(self.s)
+        self.z = -(z(self.s)+r)
         self.y = y(self.s)
 
 
         m = np.max(np.abs(q))
         
         # Sanity check bro
-        print((q[endt-9]-q[endt+9]+q[-1])/1)
-        print((-q[0]+q[endl-9]-q[endl+9])/1)
+        print((q[endt-9]-q[endt+9]+q[-1])/m)
+        print((-q[0]+q[endl-9]-q[endl+9])/m)
 
         self.q = q
         self.m = m
@@ -273,19 +297,35 @@ class section():
         self.mises = np.sqrt(np.square(self.q)+3*np.square(self.q/t(self.s)))
 
     def show(self):
-        plt.scatter(self.sc,0)
+        plt.title("Shear Flow [N/m]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
+        plt.scatter(-self.sc-r,0)
         plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.m, vmax=self.m)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
+
+        
+        plt.title("Direct Stress [$N/m^2$]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
         plt.scatter(self.z, self.y, c=self.sig)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
+
+
+        plt.title("Mises Stress [$N/m^2$]")
+        plt.ylabel("y [m]")
+        plt.xlabel("z [m]")
+        plt.xlim(0.2, -c-r-0.2)
         plt.scatter(self.z, self.y, c=self.mises)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 200000, -20000, -2000, 8000, -1000)
+s = section(0.0001, 2000, 000, 0000, 00, 000)
 s.show()
