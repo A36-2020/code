@@ -160,6 +160,21 @@ scaled_interpolated_xlist = []
 for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
 
+def q_y(x,p):
+    dx = la/len(Qthingy)
+    s = 0
+    r = 0
+    i = 0
+    while s <= (x-dx):
+        r += Qthingy[i]*(x-s)**p
+        s += dx
+        i += 1
+    return r
+
+print(q_y(la,0))
+
+q_y = np.vectorize(q_y)
+
 def Mz_Q(x1,x2,x3,xA,Q,x,CoP,Ca):
     Q = (np.asarray(Q))
     x = np.asarray(x)
@@ -293,7 +308,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[9][10] = 1
 
     bm_knowns[9] = 0
-
+#
     #Row 11
     bm[10][3] = (x3-x1)**3/(6*E*Izz_total)
     bm[10][4] = (x3-x2)**3/(6*E*Izz_total)
@@ -339,13 +354,13 @@ def maucaly0(x, xn):
     return np.where(x>xn,1,0)
 
 def deflectiony(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3-q_y(x,3))+C1*x+C2
 
 def sheary(x, one, two, three, A, P, C1, C2):
-    return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
+    return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)-q_y(x,0)
 
 def momenty(x, one, two, three, A, P, C1, C2):
-    return one*maucaly(x,x1)**1+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
+    return one*maucaly(x,x1)**1+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1-q_y(x,1)
 
 
 def deflectionz(x, one, two, three, A, P, C1, C2):
