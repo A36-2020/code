@@ -17,4 +17,4 @@ d3 = 0.01245
 theta = 30
 P = 49200
 
-Ast = tsk*(wst+hst)
+Ast = tst*(wst+hst)
