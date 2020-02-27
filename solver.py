@@ -151,9 +151,9 @@ interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xl
 
 interpolated_xlist = [interpolated_xlist]
 
-for i in range(len(interpolated_qvalues)):
-    interpolated_qvalues[i] = 0
-print(interpolated_qvalues)
+#for i in range(len(interpolated_qvalues)):
+#    interpolated_qvalues[i] = 0
+#print(interpolated_qvalues)
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
@@ -184,8 +184,9 @@ def Mz_Q(x1,x2,x3,xA,Q,x,CoP,Ca):
     Mz_Q_x2 = Q_x2*(x2-x_x2)**3
     Mz_Q_x3 = Q_x3*(x3-x_x3)**3
     T_A = Q_xA*(-abs(CoP-SC))
+    Mx_A = Q_xA*(xA-x_xa)**3
     Mx_Q    = Q*(-CoP-0.5*h)
-    return Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q,T_A
+    return Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q,T_A,Mx_A
 
 def moments_x_Q(q,qx,x):
     q = -(np.asarray(q))
@@ -197,7 +198,7 @@ def moments_x_Q(q,qx,x):
     return float(momentsum)
 
 xA = x2-xa/2
-Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q,T_A = Mz_Q(x1,x2,x3,xA,interpolated_qvalues,scaled_interpolated_xlist,Ca,interpolated_CoPs)
+Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q,T_A,Mx_A = Mz_Q(x1,x2,x3,xA,interpolated_qvalues,scaled_interpolated_xlist,Ca,interpolated_CoPs)
 
 #print("Moments:")
 #print(Mz_Q, Mz_Q_x1, Mz_Q_x2, Mz_Q_x3, Mx_Q)
@@ -206,18 +207,26 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 
     #Matrix with unknowns (left part)
     bm = np.zeros((12,12))
+
+    bm_knowns = np.zeros((12, 1))
+
     #Row 1:
     #Sum of forces in y
     bm[0][0] = 1
     bm[0][1] = 1
     bm[0][2] = 1
     bm[0][6] = m.sin(theta/180.*m.pi)
+
+    bm_knowns[0] = P * m.sin(theta / 180. * m.pi) - np.sum(np.asarray(Qthingy))
+
     #Row 2:
     #Sum of forces in z
     bm[1][3] = 1
     bm[1][4] = 1
     bm[1][5] = 1
     bm[1][6] = m.cos(theta/180.*m.pi)
+
+    bm_knowns[1] = P * m.cos(theta / 180. * m.pi)
 
     #Row 3
     #Sum of moments around x
@@ -226,12 +235,17 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[2][5] = 0
     bm[2][6] = - m.cos(theta/180.*m.pi)*ha/2 + m.sin(theta/180.*m.pi)*ha/2
 
+    bm_knowns[2] = -P * m.cos(theta / 180. * m.pi) * ha / 2 + P * m.sin(theta / 180. * m.pi) * ha / 2 + np.sum(Mx_Q)
+
     #Row 4
     #Sum of moments around y
     bm[3][3] = x1
     bm[3][4] = x2
     bm[3][5] = x3
     bm[3][6] = m.cos(theta/180.*m.pi)*(x2-xa/2)
+
+    bm_knowns[3] = P * m.cos(theta / 180. * m.pi) * (x2 + xa / 2)
+
     #Row 5
     #Sum of moments around z
     bm[4][0] = x1
@@ -239,15 +253,21 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[4][2] = x3
     bm[4][6] = m.sin(theta/180.*m.pi) * (x2 - xa / 2)
 
+    bm_knowns[4] = P * m.sin(theta / 180. * m.pi) * (x2 + xa / 2) + np.sum(Mz_Q)
+
     #Row 6
     bm[5][7] = x1
     bm[5][8] = 1
+
+    bm_knowns[5] = 1 / (6 * E * Iyy_total) * np.sum(Mz_Q_x1) + d1 * m.cos(theta / 180. * m.pi)
 
     #Row 7
     bm[6][0] = -(x2-x1)**3/(6*E*Iyy_total)
     bm[6][6] = -m.sin(theta/180.*m.pi)*(xa/2)**3/(6*E*Iyy_total)
     bm[6][7] = x2
     bm[6][8] = 1
+
+    bm_knowns[6] = np.sum(Mz_Q_x2) / (6 * E * Iyy_total)
 
     #Row 8
     bm[7][0] = -(x3-x1)**3/(6*E*Iyy_total)
@@ -256,15 +276,22 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[7][7] = x3
     bm[7][8] = 1
 
+    bm_knowns[7] = np.sum(Mz_Q_x3) / (6 * E * Iyy_total) + P * m.sin(theta / 180. * m.pi) * (
+                x3 - (x2 + xa / 2)) ** 3 * 1 / (6 * E * Iyy_total) + d3 * m.cos(theta / 180. * m.pi)
+
     #Row 9
     bm[8][9]= x1
     bm[8][10]= 1
+
+    bm_knowns[8] = -d1 * m.sin(theta / 180. * m.pi)
 
     #Row 10
     bm[9][3] = (x2-x1)**3/(6*E*Izz_total)
     bm[9][6] = m.cos(theta/180.*m.pi)*(xa/2)**3/(6*E*Izz_total)
     bm[9][9] = x2
     bm[9][10] = 1
+
+    bm_knowns[9] = 0
 
     #Row 11
     bm[10][3] = (x3-x1)**3/(6*E*Izz_total)
@@ -273,29 +300,17 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[10][9] = x3
     bm[10][10] = 1
 
+    bm_knowns[10] = P * m.cos(theta / 180. * m.pi) * (x3 - (x2 + xa / 2)) ** 3 / (6 * E * Izz_total) - d3 * m.sin(
+        theta / 180. * m.pi)
+
     #Row 12
-    bm[11][0] = (ha/2-SC)/(G*J)
+    bm[11][0] = 1/6*(E*Iyy_total)*((x2-xa/2)-x1)**3*m.sin(theta/180.*m.pi)
+    bm[11][4] = SC*m.sin(theta/180.*m.pi)+1/(6*E*Izz_total)*((x2-xa/2)-x1)**3*m.cos(theta/180.*m.pi)
     bm[11][11] = 1
 
-    print(bm)
+    bm_knowns[11] = (np.sum(T_A) * SC - 1 / (6 * E * Iyy_total) * np.sum(Mx_A)) * m.sin(theta / 180. * m.pi)
 
-    #Matrix of knowns (right part)
-
-    bm_knowns = np.zeros((12,1))
-
-    bm_knowns[0] = P*m.sin(theta/180.*m.pi)-np.sum(np.asarray(Qthingy))
-    bm_knowns[1] = P*m.cos(theta/180.*m.pi)
-    bm_knowns[2] = -P*m.cos(theta/180.*m.pi)*ha/2 + P*m.sin(theta/180.*m.pi)*ha/2 + np.sum(Mx_Q)
-    bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
-    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
-    bm_knowns[5] = 1/(6*E*Iyy_total)*np.sum(Mz_Q_x1)+d1*m.cos(theta/180.*m.pi)
-    bm_knowns[6] = np.sum(Mz_Q_x2)/(6*E*Iyy_total)
-    bm_knowns[7] = np.sum(Mz_Q_x3)/(6*E*Iyy_total)+P*m.sin(theta/180.*m.pi)*(x3-(x2+xa/2))**3*1/(6*E*Iyy_total)+d3*m.cos(theta/180.*m.pi)
-    bm_knowns[8] = -d1*m.sin(theta/180.*m.pi)
-    bm_knowns[9] = 0
-    bm_knowns[10]= P*m.cos(theta/180.*m.pi)*(x3-(x2+xa/2))**3/(6*E*Izz_total)-d3*m.sin(theta/180.*m.pi)
-    bm_knowns[11] = -np.sum(T_A)
-
+    #print(bm)
 
     variables = np.linalg.solve(bm,bm_knowns)
     R1y = variables[0]
@@ -310,17 +325,20 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     C1z = variables[9]
     C2z = variables[10]
     CT = variables[11]
-    return R1y[0],R2y[0],R3y[0],R1z[0],R2z[0],R3z[0],A[0],C1y[0],C2y[0],C1z[0],C2z[0],CT[0]
+    return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT
 
 
 vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
+print(vals)
 
 def maucaly(x, xn):
     return np.where(x>xn,x-xn,0)
 
 def shear(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3-A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3+P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+    return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
 
 a  = np.linspace(0,la,1000)
-plt.plot(a, shear(a, -47000, 65000, -18000, vals[6], P, vals[7], vals[8]))
+
+#-47000, 65000, -18000
+plt.plot(a, shear(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
