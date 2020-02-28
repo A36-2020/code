@@ -11,7 +11,7 @@ c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
-zbar = 0.2164
+zbar = 0.21665
 off = zbar-r
 
 def _t(s):
@@ -249,12 +249,10 @@ class section():
         qbt = -1*(integrate_2(qt, ds)/F100.tsk-integrate_2(sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
         qbl = -1*(integrate_2(ql, ds)/F100.tsk+integrate_2(sp, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
 
-        self.qsz = Vz*(line_zz(self.s)+0*sumz(self.s))/Izz
-        qbz = -1*(integrate_2(self.qsz[:endl],ds)/F100.tsk)/((2*l+r*pi)/F100.tsk)
-
         qt += qbt 
         ql += qbl 
         sp = sp + qbl - qbt 
+        sp *= -1
 
 
         # Shear flow over, now torque
@@ -288,13 +286,16 @@ class section():
         m = np.max(np.abs(q))
         
         # Sanity check bro
-        print((q[endt-9]-q[endt+9]+q[-1])/m)
-        print((-q[0]+q[endl-9]-q[endl+9])/m)
+        print("Sanity check")
+        print((q[endt-1]-q[endt+1]-q[-1])/m)
+        print((-q[0]+q[endl-1]+q[endl+1])/m)
 
         self.q = q
-        self.m = m
+        self.mq = m
 
-        self.mises = np.sqrt(np.square(self.q)+3*np.square(self.q/t(self.s)))
+        self.mises = np.sqrt(np.square(self.sig)+3*np.square(self.q/t(self.s)))
+        self.mm = np.max(np.abs(self.mises))
+        self.ms = np.max(np.abs(self.sig))
 
     def show(self):
         plt.title("Shear Flow [N/m]")
@@ -302,7 +303,7 @@ class section():
         plt.xlabel("z [m]")
         plt.xlim(0.2, -c-r-0.2)
         plt.scatter(-self.sc-r,0)
-        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.m, vmax=self.m)
+        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.mq, vmax=self.mq)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -312,7 +313,7 @@ class section():
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
         plt.xlim(0.2, -c-r-0.2)
-        plt.scatter(self.z, self.y, c=self.sig)
+        plt.scatter(self.z, self.y, c=self.sig, cmap="jet", vmin=-self.ms, vmax=self.ms)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
@@ -322,7 +323,7 @@ class section():
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
         plt.xlim(0.2, -c-r-0.2)
-        plt.scatter(self.z, self.y, c=self.mises)
+        plt.scatter(self.z, self.y, c=self.mises, cmap="jet", vmin=-self.mm, vmax=self.mm)
         plt.colorbar()
         plt.axis('equal')
         plt.show()
