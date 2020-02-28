@@ -76,7 +76,38 @@ def Moment_of_Inertia_semicirc():
 
     return Izz_total_c, Iyy_total_c
 
+def calcJ():
+    ## Calculation of J
+    dy = h / 2.
+    A1 = math.pi * dy ** 2 / 2.
+    A2 = (Ca - dy) * dy
+
+    A = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    b = np.array([0., 0., 0.])
+
+    ## Row 1
+    A[0, 0] = 2. * A1
+    A[0, 1] = 2. * A2
+    b[0] = 1
+
+    ## Row 2
+    A[1, 0] = (dy * math.pi / tsk + 2 * dy / tsp) / (2 * A1)
+    A[1, 1] = (-2 * dy / tsp) / (2 * A1)
+    A[1, 2] = -1.
+    b[1] = 0.
+
+    ## Row 3
+    A[2, 0] = (-2 * dy / tsp) / (2 * A2)
+    A[2, 1] = (2 * areaskin / tsk**2 + 2 * dy / tsp) / (2 * A2)
+    A[2, 2] = -1
+    b[2] = 0.
+
+    solution = np.linalg.solve(A, b)
+    J = 1. / solution[-1]
+    return J
+
 if  __name__ == '__main__':
+    print(calcJ())
     print(Moment_of_inertia())
     print(Moment_of_Inertia_triangle())
     print(Moment_of_Inertia_semicirc())

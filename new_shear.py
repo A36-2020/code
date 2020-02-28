@@ -1,5 +1,5 @@
 import numpy as np
-import F100
+import F100 as F100
 import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt
@@ -11,7 +11,6 @@ c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
-zbar = 0.2164
 off = zbar-r
 
 def _t(s):
@@ -210,7 +209,7 @@ plt.show()
 Iyy, Izz = Moment_of_Inertia.Moment_of_inertia()
 zbar = 0.204
 Acs = 0.002
-print(Iyy, Izz)
+print("...:", Iyy, Izz)
 
 class section():
     def __init__(self, ds, Vy, Vz, T, My=0, Mz=0):
@@ -249,12 +248,10 @@ class section():
         qbt = -1*(integrate_2(qt, ds)/F100.tsk-integrate_2(sp, ds)/F100.tsp)/(2*l/F100.tsk+2*r/F100.tsp)
         qbl = -1*(integrate_2(ql, ds)/F100.tsk+integrate_2(sp, ds)/F100.tsp)/(r*pi/F100.tsk+2*r/F100.tsp)
 
-        self.qsz = Vz*(line_zz(self.s)+0*sumz(self.s))/Izz
-        qbz = -1*(integrate_2(self.qsz[:endl],ds)/F100.tsk)/((2*l+r*pi)/F100.tsk)
-
         qt += qbt 
         ql += qbl 
         sp = sp + qbl - qbt 
+        sp *= -1
 
 
         # Shear flow over, now torque
@@ -288,22 +285,32 @@ class section():
         m = np.max(np.abs(q))
         
         # Sanity check bro
-        print((q[endt-9]-q[endt+9]+q[-1])/m)
-        print((-q[0]+q[endl-9]-q[endl+9])/m)
+        print("Sanity check")
+        print((q[endt-1]-q[endt+1]-q[-1])/m)
+        print((-q[0]+q[endl-1]+q[endl+1])/m)
 
         self.q = q
-        self.m = m
+        self.mq = m
 
-        self.mises = np.sqrt(np.square(self.q)+3*np.square(self.q/t(self.s)))
+        self.mises = np.sqrt(np.square(self.sig)+3*np.square(self.q/t(self.s)))
+        self.mm = np.max(np.abs(self.mises))
+        self.ms = np.max(np.abs(self.sig))
+        print("Max Mises: ", np.max(self.mises),", Min: ", np.min(self.mises))
+        print("Max Shear: ", np.max(self.q/t(self.s)),", Min: ", np.min(self.q/t(self.s)))
+
+        print("Mises: ", np.max(self.mises), ", ", np.min(self.mises))
+        print("Shear: ", np.max(self.q/t(self.s)), ", ", np.min(self.q/t(self.s)))
+        print("Direct: ", np.max(self.sig), ", ", np.min(self.sig))
 
     def show(self):
         plt.title("Shear Flow [N/m]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
         plt.scatter(-self.sc-r,0)
-        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.m, vmax=self.m)
-        plt.colorbar()
+        plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.mq, vmax=self.mq)
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
@@ -311,9 +318,10 @@ class section():
         plt.title("Direct Stress [$N/m^2$]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
-        plt.scatter(self.z, self.y, c=self.sig)
-        plt.colorbar()
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
+        plt.scatter(self.z, self.y, c=self.sig, cmap="jet", vmin=-self.ms, vmax=self.ms)
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
@@ -321,11 +329,11 @@ class section():
         plt.title("Mises Stress [$N/m^2$]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
-        plt.scatter(self.z, self.y, c=self.mises)
-        plt.colorbar()
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
+        plt.scatter(self.z, self.y, c=self.mises, cmap="jet", vmin=0, vmax=self.mm)
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 2000, 000, 0000, 00, 000)
-s.show()
+s = section(0.000001, 0,0,0,0,0)
