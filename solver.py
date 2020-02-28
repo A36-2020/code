@@ -360,7 +360,8 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 
 
 vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Iyy_total,Izz_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
-#print(vals)
+
+print(vals)
 
 def torque_plot():
 
@@ -406,9 +407,9 @@ def torque_plot():
         if scaled_interpolated_xlist[0][i] > x1:
             T_A = T_A - vals[0]*(SC+h/2)
         if scaled_interpolated_xlist[0][i] > x2:
-            T_A = T_A + vals[1]*(SC+h/2)
+            T_A = T_A - vals[1]*(SC+h/2)
         if scaled_interpolated_xlist[0][i] > x3:
-            T_A = T_A + vals[2]*(SC+h/2)
+            T_A = T_A - vals[2]*(SC+h/2)
 
         internal_torques = float(T_A)
         #print(internal_torques)
@@ -420,8 +421,29 @@ def torque_plot():
 
     return internal_torque_list
 
+def deflection_plot(internal_torque,xlist):
+
+    internal_deflection_list = [0]
+    print(internal_torque)
+
+    for i in range(len(xlist[0])-1):
+        internal_deflection = internal_deflection_list[i] + 1/(G*J) * internal_torque[i]*(xlist[0][i+1]-xlist[0][i])
+        internal_deflection_list.append(internal_deflection)
+
+    print(internal_deflection_list)
+    return internal_deflection_list
 
 aaaaaaa = torque_plot()
+torques = deflection_plot(aaaaaaa,scaled_interpolated_xlist)
+
+plt.plot(scaled_interpolated_xlist[0],torques)
+plt.show()
+
+
+
+
+
+
 
 #print(aaaaaaa)
 another_list = []
