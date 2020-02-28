@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from F100 import *
+from B737 import *
 from matplotlib.patches import Wedge
 #from mainF100 import *
 
