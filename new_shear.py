@@ -1,5 +1,5 @@
 import numpy as np
-import B737 as F100
+import F100 as F100
 import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt

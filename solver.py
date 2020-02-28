@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math as m
 from mpl_toolkits import mplot3d
-from B737 import *
+from F100 import *
 from Moment_of_Inertia import *
 from material import *
 from integrate import *
@@ -13,7 +13,7 @@ Nz = 81
 Nx = 41
 #Ca = 0.505
 #la = 1.611
-SC = -0.104
+SC = -0.0855
 #d1 = 0
 #d3 = 0
 
@@ -437,6 +437,7 @@ aaaaaaa = torque_plot()
 torques = deflection_plot(aaaaaaa,scaled_interpolated_xlist)
 
 plt.plot(scaled_interpolated_xlist[0],torques)
+plt.savefig("Boeing_deflection.pdf")
 plt.show()
 
 
