@@ -13,7 +13,7 @@ Nz = 81
 Nx = 41
 #Ca = 0.505
 #la = 1.611
-SC = -0.0816
+SC = -0.104
 #d1 = 0
 #d3 = 0
 
@@ -420,6 +420,7 @@ def torque_plot():
 
     return internal_torque_list
 
+
 aaaaaaa = torque_plot()
 
 #print(aaaaaaa)
@@ -432,6 +433,7 @@ for i in scaled_interpolated_xlist[0]:
 plt.plot(another_list,aaaaaaa)
 plt.title("TORQUE PLOT!")
 plt.show()
+
 
 
 
