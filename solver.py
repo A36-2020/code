@@ -6,6 +6,7 @@ from F100 import *
 from Moment_of_Inertia import *
 from material import *
 from integrate import *
+from new_shear import section
 # values
 #-------------------------------
 Nz = 81
@@ -409,3 +410,11 @@ plt.show()
 
 plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
 plt.show()
+
+x = 0.2
+Vy =  sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
+My =  momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
+Vz = shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+Mz = momentz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+s = section(0.001, Vy,Vz,0,My,Mz)
+s.show()
