@@ -487,7 +487,7 @@ def shearz(x, one, two, three, A, P, C1, C2):
     return +one*maucaly0(x,x1)+A*m.cos(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.cos(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
 
 def momentz(x, one, two, three, A, P, C1, C2):
-    return +one*maucaly(x,x1)**1-A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**+two*maucaly(x,x2)**1+P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
+    return +one*maucaly(x,x1)**1-A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1+P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 a  = np.linspace(0,la,1000)
 
 def twist(x, oney, twoy, threy, A, P, C):
@@ -498,18 +498,30 @@ def twist(x, oney, twoy, threy, A, P, C):
 #-47000, 65000, -18000
 """
 plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.ylabel("Shear Force y [N]")
+plt.xlabel("X position [m]")
 plt.show()
 plt.plot(a, momenty(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.ylabel("Internal Moment z [Nm]")
+plt.xlabel("X position [m]")
 plt.show()
 """
 plt.plot(a, deflectiony(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.ylabel("Deflection y [m]")
+plt.xlabel("X position [m]")
 plt.show()
 """
 plt.plot(a, shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.ylabel("Shear Force z [N]")
+plt.xlabel("X position [m]")
 plt.show()
-plt.plot(a, momenty(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.plot(a, momentz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.ylabel("Internal Moment y [Nm]")
+plt.xlabel("X position [m]")
 plt.show()
-plt.plot(a, deflectiony(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.plot(a, deflectionz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.ylabel("Deflection z [m]")
+plt.xlabel("X position [m]")
 plt.show()
 
 plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
