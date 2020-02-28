@@ -11,7 +11,6 @@ c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
-zbar += 0.0178
 off = zbar-r
 
 def _t(s):
@@ -140,8 +139,8 @@ line_zz = np.vectorize(_line_zz)
 def _sumy(s):
     val = 0
     if s < l:
-        n = floor(s/(l/6))
-        y = (1+(n-1)/2)*((l/6))*r/l
+        n = floor(s/(l/5))
+        y = (1+(n-1)/2)*((l/5))*r/l
         y -= r
         return val + F100.Ast * y * n
     else:
@@ -149,8 +148,8 @@ def _sumy(s):
 
     s -= l
     if s < l:
-        n = floor(s/(l/6))
-        y = (1+(n-1)/2)*((l/6))*r/l
+        n = floor(s/(l/5))
+        y = (1+(n-1)/2)*((l/5))*r/l
         return val + F100.Ast * y * n
     else:
         val -= 4*F100.Ast*(-r/2)
@@ -172,16 +171,16 @@ sumy = np.vectorize(_sumy)
 def _sumz(s):
     val = 0
     if s < l:
-        n = floor(s/(l/6))
-        y = (1+(n-1)/2)*((l/6))*c/l-off
+        n = floor(s/(l/5))
+        y = (1+(n-1)/2)*((l/5))*c/l-off
         return val + F100.Ast * y * n
     else:
         val += 4*F100.Ast*(c/2-off)
 
     s -= l
     if s < l:
-        n = floor(s/(l/6))
-        y = (1+(n-1)/2)*((l/6))*c/l
+        n = floor(s/(l/5))
+        y = (1+(n-1)/2)*((l/5))*c/l
         y = c-y-off
         return val + F100.Ast * y * n
     else:
