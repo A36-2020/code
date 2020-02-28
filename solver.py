@@ -153,8 +153,8 @@ interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xl
 print(sum(interpolated_qvalues))
 interpolated_xlist = [interpolated_xlist]
 
-for i in range(len(interpolated_qvalues)):
-    interpolated_qvalues[i] = 0
+#for i in range(len(interpolated_qvalues)):
+#    interpolated_qvalues[i] = 0
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
@@ -169,11 +169,25 @@ def q_y(x,p):
         r += Qthingy[i]*(x-s)**p
         s += dx
         i += 1
-    return r
+    return r#/m.factorial(p)
 
 print(q_y(la,0))
 
 q_y = np.vectorize(q_y)
+print(q_y(la,1),q_y(la,0)*(la/2))
+
+def q_t(x,p):
+    dx = la/len(Qthingy)
+    s = 0
+    r = 0
+    i = 0
+    while s <= (x-dx):
+        r += Qthingy[i]*(CoP[i]-SC)
+        s += dx
+        i += 1
+    return r/m.factorial(p)
+
+q_t = np.vectorize(q_t)
 
 def Mz_Q(x1,x2,x3,xA,Q,x,CoP,Ca):
     Q = (np.asarray(Q))
@@ -376,7 +390,7 @@ a  = np.linspace(0,la,1000)
 def twist(x, oney, twoy, threy, A, P, C):
     s = -SC
     t = theta/180*m.pi
-    return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3))
+    return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3)+q_t(x,0))
 
 #-47000, 65000, -18000
 plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
