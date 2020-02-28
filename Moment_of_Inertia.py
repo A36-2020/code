@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from Centroid import *
-from F100 import *
+from B737 import *
 
 
 def Moment_of_inertia():
