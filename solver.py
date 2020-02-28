@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math as m
 from mpl_toolkits import mplot3d
-from F100 import *
+from B737 import *
 from Moment_of_Inertia import *
 from material import *
 from integrate import *
@@ -11,8 +11,8 @@ from new_shear import section
 #-------------------------------
 Nz = 81
 Nx = 41
-Ca = 0.505
-la = 1.611
+#Ca = 0.505
+#la = 1.611
 SC = -0.0816
 #d1 = 0
 #d3 = 0
@@ -471,13 +471,15 @@ def twist(x, oney, twoy, threy, A, P, C):
     return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3)+q_t(x,0))
 '''
 #-47000, 65000, -18000
+"""
 plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
 plt.plot(a, momenty(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
+"""
 plt.plot(a, deflectiony(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
-
+"""
 plt.plot(a, shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
 plt.show()
 plt.plot(a, momenty(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
@@ -487,14 +489,14 @@ plt.show()
 
 plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
 plt.show()
-
-x = 0.45
-Vy =  sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
-My =  momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
-Vz = shearz(x,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+"""
+x = 1.2235
+Vy = sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]/3
+My = momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]/6
+Vz = shearz(x,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]/3
 print("dasfasdf ", Vz)
 Mz = momentz(x,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
-T = 1185
+T = -8185/3
 s = section(0.00005, Vy,Vz,T,My,Mz)
 s.show()
 '''

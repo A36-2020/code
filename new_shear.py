@@ -1,5 +1,5 @@
 import numpy as np
-import F100
+import B737 as F100
 import Moment_of_Inertia
 from math import *
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ c = F100.Ca - F100.h/2
 r = F100.h/2
 l = sqrt(r**2+c**2)
 
-zbar = 0.21665
+zbar += 0.0178
 off = zbar-r
 
 def _t(s):
@@ -140,8 +140,8 @@ line_zz = np.vectorize(_line_zz)
 def _sumy(s):
     val = 0
     if s < l:
-        n = floor(s/(l/5))
-        y = (1+(n-1)/2)*((l/5))*r/l
+        n = floor(s/(l/6))
+        y = (1+(n-1)/2)*((l/6))*r/l
         y -= r
         return val + F100.Ast * y * n
     else:
@@ -149,8 +149,8 @@ def _sumy(s):
 
     s -= l
     if s < l:
-        n = floor(s/(l/5))
-        y = (1+(n-1)/2)*((l/5))*r/l
+        n = floor(s/(l/6))
+        y = (1+(n-1)/2)*((l/6))*r/l
         return val + F100.Ast * y * n
     else:
         val -= 4*F100.Ast*(-r/2)
@@ -172,16 +172,16 @@ sumy = np.vectorize(_sumy)
 def _sumz(s):
     val = 0
     if s < l:
-        n = floor(s/(l/5))
-        y = (1+(n-1)/2)*((l/5))*c/l-off
+        n = floor(s/(l/6))
+        y = (1+(n-1)/2)*((l/6))*c/l-off
         return val + F100.Ast * y * n
     else:
         val += 4*F100.Ast*(c/2-off)
 
     s -= l
     if s < l:
-        n = floor(s/(l/5))
-        y = (1+(n-1)/2)*((l/5))*c/l
+        n = floor(s/(l/6))
+        y = (1+(n-1)/2)*((l/6))*c/l
         y = c-y-off
         return val + F100.Ast * y * n
     else:
@@ -296,15 +296,18 @@ class section():
         self.mises = np.sqrt(np.square(self.sig)+3*np.square(self.q/t(self.s)))
         self.mm = np.max(np.abs(self.mises))
         self.ms = np.max(np.abs(self.sig))
+        print("Max Mises: ", np.max(self.mises),", Min: ", np.min(self.mises))
+        print("Max Shear: ", np.max(self.q/t(self.s)),", Min: ", np.min(self.q/t(self.s)))
 
     def show(self):
         plt.title("Shear Flow [N/m]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
         plt.scatter(-self.sc-r,0)
         plt.scatter(self.z, self.y, c=self.q, cmap="jet", vmin=-self.mq, vmax=self.mq)
-        plt.colorbar()
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
@@ -312,9 +315,10 @@ class section():
         plt.title("Direct Stress [$N/m^2$]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
         plt.scatter(self.z, self.y, c=self.sig, cmap="jet", vmin=-self.ms, vmax=self.ms)
-        plt.colorbar()
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
@@ -322,9 +326,10 @@ class section():
         plt.title("Mises Stress [$N/m^2$]")
         plt.ylabel("y [m]")
         plt.xlabel("z [m]")
-        plt.xlim(0.2, -c-r-0.2)
-        plt.scatter(self.z, self.y, c=self.mises, cmap="jet", vmin=-self.mm, vmax=self.mm)
-        plt.colorbar()
+        plt.xlim(0.05, -c-r-0.05)
+        plt.ylim(-r-0.05, r+0.05)
+        plt.scatter(self.z, self.y, c=self.mises, cmap="jet", vmin=0, vmax=self.mm)
+        plt.colorbar(orientation="horizontal")
         plt.axis('equal')
         plt.show()
 
