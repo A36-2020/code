@@ -149,9 +149,9 @@ for j in range (interpolated_xlist_len):
 
 
 Qthingy,CoP = simpson(arr,z,x)
-print(sum(Qthingy))
+#print(sum(Qthingy))
 interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
-print(sum(interpolated_qvalues))
+#print(sum(interpolated_qvalues))
 interpolated_xlist = [interpolated_xlist]
 
 #for i in range(len(interpolated_qvalues)):
@@ -172,10 +172,10 @@ def q_y(x,p):
         i += 1
     return r#/m.factorial(p)
 
-print(q_y(la,0))
+#print(q_y(la,0))
 
 q_y = np.vectorize(q_y)
-print(q_y(la,1),q_y(la,0)*(la/2))
+#print(q_y(la,1),q_y(la,0)*(la/2))
 
 def q_t(x,p):
     dx = la/len(Qthingy)
@@ -191,7 +191,7 @@ def q_t(x,p):
 q_t = np.vectorize(q_t)
 
 def Mz_Q(x1,x2,x3,xA,Q,x,CoP,Ca):
-    Q = (np.asarray(Q))
+    Q = np.asarray(Q)
     x = np.asarray(x)
     CoP = np.asarray(CoP)
 
@@ -336,7 +336,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 
     #Row 12
     bm[11][0] = 1/6*(E*Iyy_total)*((x2-xa/2)-x1)**3*m.sin(theta/180.*m.pi)
-    bm[11][4] = SC*m.sin(theta/180.*m.pi)+1/(6*E*Izz_total)*((x2-xa/2)-x1)**3*m.cos(theta/180.*m.pi)
+    bm[11][4] = SC*m.sin(theta/180.*m.pi)-1/(6*E*Izz_total)*((x2-xa/2)-x1)**3*m.cos(theta/180.*m.pi)
     bm[11][11] = 1
 
     bm_knowns[11] = (np.sum(T_A) * SC - 1 / (6 * E * Iyy_total) * np.sum(Mx_A)) * m.sin(theta / 180. * m.pi)
@@ -360,7 +360,84 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 
 
 vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Iyy_total,Izz_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
-print(vals)
+#print(vals)
+
+def torque_plot():
+
+    internal_torque_list = [0]
+
+    for i in range(len(scaled_interpolated_xlist[0])):
+        #print(scaled_interpolated_xlist[0][i])
+
+        Q = np.asarray(interpolated_qvalues)
+        #print(Q)
+        x = np.asarray(scaled_interpolated_xlist)
+        #print(x)
+        CoP = np.asarray(interpolated_CoPs)
+
+        #print(CoP)
+
+        mask_xA = (x[0] < scaled_interpolated_xlist[0][i])
+        #print(mask_xA)
+        Q_xA = Q[mask_xA]
+        CoP_masked = CoP[mask_xA]
+        # print(len(CoP_masked))
+        # print(Q_xA.shape)
+
+        SC_list = np.ones(len(CoP_masked))*SC
+        # print(SC_list.shape)
+        # print(CoP_masked.shape)
+        x_xa = x[0][mask_xA]
+        T_A_local = 0
+
+        for j in range(len(Q_xA)):
+            #print(len(mask_xA),len(Q_xA),len(CoP_masked))
+            T_A_local = T_A_local + Q_xA[j] * (CoP_masked[j]-SC)
+
+
+        #T_A = Q_xA * (-abs(CoP_masked) - SC_list)
+        T_A = T_A_local
+        if scaled_interpolated_xlist[0][i] > (x2-xa/2):
+            T_A = T_A + vals[6]*(m.cos(theta/180*m.pi)*h/2-m.sin(theta/180*m.pi)*-SC)
+
+        if scaled_interpolated_xlist[0][i] > (x2+xa/2):
+            T_A = T_A - P*(-m.cos(theta/180*m.pi)*h/2+m.sin(theta/180*m.pi)*-SC)
+
+        if scaled_interpolated_xlist[0][i] > x1:
+            T_A = T_A - vals[0]*(SC+h/2)
+        if scaled_interpolated_xlist[0][i] > x2:
+            T_A = T_A + vals[1]*(SC+h/2)
+        if scaled_interpolated_xlist[0][i] > x3:
+            T_A = T_A + vals[2]*(SC+h/2)
+
+        internal_torques = float(T_A)
+        #print(internal_torques)
+        internal_torque_list.append(internal_torques)
+
+    internal_torque_list = internal_torque_list[1:]
+    print("LENGTH:")
+    print(len(internal_torque_list))
+
+    return internal_torque_list
+
+aaaaaaa = torque_plot()
+
+#print(aaaaaaa)
+another_list = []
+for i in scaled_interpolated_xlist[0]:
+    another_list.append(i)
+
+#print(another_list)
+
+plt.plot(another_list,aaaaaaa)
+plt.title("TORQUE PLOT!")
+plt.show()
+
+
+
+
+
+
 
 def maucaly(x, xn):
     return np.where(x>xn,x-xn,0)
@@ -385,14 +462,14 @@ def shearz(x, one, two, three, A, P, C1, C2):
     return +one*maucaly0(x,x1)+A*m.cos(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.cos(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
 
 def momentz(x, one, two, three, A, P, C1, C2):
-    return +one*maucaly(x,x1)**1+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**+two*maucaly(x,x2)**1-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
+    return +one*maucaly(x,x1)**1+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 a  = np.linspace(0,la,1000)
 
 def twist(x, oney, twoy, threy, A, P, C):
     s = -SC
     t = theta/180*m.pi
     return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3)+q_t(x,0))
-
+'''
 #-47000, 65000, -18000
 plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
@@ -411,10 +488,11 @@ plt.show()
 plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
 plt.show()
 
-x = 0.2
+x = 0.45
 Vy =  sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
 My =  momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
 Vz = shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
 Mz = momentz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
-s = section(0.001, Vy,Vz,0,My,Mz)
+s = section(0.0001, Vy,Vz,0,My,Mz)
 s.show()
+'''
