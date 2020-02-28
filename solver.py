@@ -462,7 +462,7 @@ def shearz(x, one, two, three, A, P, C1, C2):
     return +one*maucaly0(x,x1)+A*m.cos(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.cos(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
 
 def momentz(x, one, two, three, A, P, C1, C2):
-    return +one*maucaly(x,x1)**1+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
+    return +one*maucaly(x,x1)**1-A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**+two*maucaly(x,x2)**1+P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 a  = np.linspace(0,la,1000)
 
 def twist(x, oney, twoy, threy, A, P, C):
@@ -491,8 +491,10 @@ plt.show()
 x = 0.45
 Vy =  sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
 My =  momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
-Vz = shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
-Mz = momentz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
-s = section(0.0001, Vy,Vz,0,My,Mz)
+Vz = shearz(x,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+print("dasfasdf ", Vz)
+Mz = momentz(x,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+T = 1185
+s = section(0.00005, Vy,Vz,T,My,Mz)
 s.show()
 '''
