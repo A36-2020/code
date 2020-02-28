@@ -332,3 +332,4 @@ class section():
         plt.axis('equal')
         plt.show()
 
+s = section(0.000001, 0,0,0,0,0)
