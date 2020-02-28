@@ -297,6 +297,10 @@ class section():
         self.mm = np.max(np.abs(self.mises))
         self.ms = np.max(np.abs(self.sig))
 
+        print("Mises: ", np.max(self.mises), ", ", np.min(self.mises))
+        print("Shear: ", np.max(self.q/t(self.s)), ", ", np.min(self.q/t(self.s)))
+        print("Direct: ", np.max(self.sig), ", ", np.min(self.sig))
+
     def show(self):
         plt.title("Shear Flow [N/m]")
         plt.ylabel("y [m]")
