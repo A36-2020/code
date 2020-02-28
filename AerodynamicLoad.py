@@ -55,7 +55,6 @@ for j in range (Nx):
 
     xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
     x[0,j] = xPos
-
 #---------------------------------------
 
 
@@ -304,6 +303,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
         theta / 180. * m.pi)
 
     #Row 12
+
     bm[11][0] = 1/6*(E*Iyy_total)*((x2-xa/2)-x1)**3*m.sin(theta/180.*m.pi)
     bm[11][4] = SC*m.sin(theta/180.*m.pi)+1/(6*E*Izz_total)*((x2-xa/2)-x1)**3*m.cos(theta/180.*m.pi)
     bm[11][11] = 1
@@ -330,7 +330,6 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
 #print("")
 #print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,sum(Mx_Q),sum(Mz_Q_x1),sum(Mz_Q_x2),sum(Mz_Q_x3))
 #print("")
-
 
 
 R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
