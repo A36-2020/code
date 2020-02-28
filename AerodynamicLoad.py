@@ -48,7 +48,6 @@ for j in range (Nx):
 
     xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
     x[0,j] = xPos
-
 #---------------------------------------
 
 # Integrating aerodynamic load along z-axis and calculating center of pressure
@@ -144,6 +143,7 @@ interpolated_xlist = interpolated_xlist[1:]
 
 
 Qthingy,CoP = simpson(arr,z,x)
+print(z)
 print(Qthingy)
 print("Qthingy:",np.sum(np.asarray(Qthingy)))
 plt.scatter(x[0],Qthingy)
@@ -286,7 +286,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm_knowns[1] = P*m.cos(theta/180.*m.pi)
     bm_knowns[2] = - P*m.cos(theta/180.*m.pi)*ha/2 + P*m.sin(theta/180.*m.pi)*ha/2 + np.sum(Mx_Q)
     bm_knowns[3] = P*m.cos(theta/180.*m.pi)*(x2+xa/2)
-    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)-np.sum(Mz_Q)
+    bm_knowns[4] = P*m.sin(theta/180.*m.pi)*(x2+xa/2)+np.sum(Mz_Q)
 
     bm_knowns[5] = 1/(6*E*Iyy_total)*np.sum(Mz_Q_x1)+d1
     bm_knowns[6] = np.sum(Mz_Q_x2)/(6*E*Iyy_total)
@@ -313,6 +313,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     C2y = variables[8]
     C1z = variables[9]
     C2z = variables[10]
+    Ct  = variables[11]
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z
 
 print("")
