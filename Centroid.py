@@ -121,6 +121,7 @@ ydown = [-0.5*h,0]
 zspar = [0.5*h,0.5*h]
 yspar = [0.5*h, -0.5*h]
 
+'''
 plt.scatter(zcentroidtotal, ycentroidtotal, label="Centroid", color= "blue", marker= "x", s=35)
 plt.scatter(z_centroid, y_centroid, label="Stiffeners", color = "orange", marker= "x", s=25)
 plt.scatter(z_centroid_semicirc, y_centroid_semicirc, label= "Semicircle", color= "green", marker= "x", s=30)
@@ -143,7 +144,7 @@ ax.set_title('Cross-section centroids')
 
 plt.legend()
 plt.show()
-
+'''
 ##Testing
 
 #centroiddiff = zcentroidtotal+crosssection.zc

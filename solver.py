@@ -6,6 +6,7 @@ from F100 import *
 from Moment_of_Inertia import *
 from material import *
 from integrate import *
+from new_shear import section
 # values
 #-------------------------------
 Nz = 81
@@ -17,6 +18,7 @@ SC = -0.0816
 #d3 = 0
 
 Izz_total, Iyy_total = Moment_of_inertia()
+print(Iyy_total,Izz_total)
 J = calcJ()
 
 
@@ -55,6 +57,7 @@ for j in range (Nx):
 
     xPos = 0.5*((la/2)*(1-m.cos(thetax))+(la/2)*(1-m.cos(thetax2)))
     x[0,j] = xPos
+
 #---------------------------------------
 
 
@@ -133,7 +136,7 @@ def interpolation_over_span(x_to_interpolate,xcoord_list, q, qz, spanlength):
         qzlist.append(interpolated_qz)
     return qlist, qzlist
 
-interpolated_xlist_len = 100000
+interpolated_xlist_len = 1000
 interpolated_xlist  = np.zeros(interpolated_xlist_len)
 for j in range (interpolated_xlist_len):
     thetax = (j/interpolated_xlist_len)*m.pi
@@ -144,19 +147,48 @@ for j in range (interpolated_xlist_len):
 
 
 
-Qthingy,CoP = simpson(arr,z,x)
 
+Qthingy,CoP = simpson(arr,z,x)
+print(sum(Qthingy))
 interpolated_qvalues,interpolated_CoPs = interpolation_over_span(interpolated_xlist,x,Qthingy,CoP,la)
 print(sum(interpolated_qvalues))
 interpolated_xlist = [interpolated_xlist]
 
 #for i in range(len(interpolated_qvalues)):
 #    interpolated_qvalues[i] = 0
-#print(interpolated_qvalues)
 
 scaled_interpolated_xlist = []
 for i in interpolated_xlist:
     scaled_interpolated_xlist.append(i*la)
+
+def q_y(x,p):
+    dx = la/len(Qthingy)
+    s = 0
+    r = 0
+    i = 0
+    while s <= (x-dx):
+        r += Qthingy[i]*(x-s)**p
+        s += dx
+        i += 1
+    return r#/m.factorial(p)
+
+print(q_y(la,0))
+
+q_y = np.vectorize(q_y)
+print(q_y(la,1),q_y(la,0)*(la/2))
+
+def q_t(x,p):
+    dx = la/len(Qthingy)
+    s = 0
+    r = 0
+    i = 0
+    while s <= (x-dx):
+        r += Qthingy[i]*(CoP[i]-SC)
+        s += dx
+        i += 1
+    return r/m.factorial(p)
+
+q_t = np.vectorize(q_t)
 
 def Mz_Q(x1,x2,x3,xA,Q,x,CoP,Ca):
     Q = (np.asarray(Q))
@@ -291,7 +323,7 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     bm[9][10] = 1
 
     bm_knowns[9] = 0
-
+#
     #Row 11
     bm[10][3] = (x3-x1)**3/(6*E*Izz_total)
     bm[10][4] = (x3-x2)**3/(6*E*Izz_total)
@@ -303,14 +335,13 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
         theta / 180. * m.pi)
 
     #Row 12
-
     bm[11][0] = 1/6*(E*Iyy_total)*((x2-xa/2)-x1)**3*m.sin(theta/180.*m.pi)
     bm[11][4] = SC*m.sin(theta/180.*m.pi)+1/(6*E*Izz_total)*((x2-xa/2)-x1)**3*m.cos(theta/180.*m.pi)
     bm[11][11] = 1
 
     bm_knowns[11] = (np.sum(T_A) * SC - 1 / (6 * E * Iyy_total) * np.sum(Mx_A)) * m.sin(theta / 180. * m.pi)
 
-    print(bm)
+    #print(bm)
 
     variables = np.linalg.solve(bm,bm_knowns)
     R1y = variables[0]
@@ -327,128 +358,9 @@ def bigmatrix(P,x1,x2,x3,xa,ca,ha,E,Izz_total,Iyy_total,theta,Qthingy,Mx_Q,Mz_Q,
     CT = variables[11]
     return R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT
 
-#print("")
-#print(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,sum(Mx_Q),sum(Mz_Q_x1),sum(Mz_Q_x2),sum(Mz_Q_x3))
-#print("")
 
-
-R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Izz_total,Iyy_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
-print("SOLUTIONS")
-print(R1y,R2y,R3y,R1z,R2z,R3z,A,C1y,C2y,C1z,C2z,CT)
-
-
-
-
-def shear_force_in_y_calculations(R1y, x1, R2y, x2, R3y, x3, A, P, xa, Qvalues, la, xsteps):
-    interpolated_xlist=np.linspace(0,la,xsteps)
-    scaled_down_interpolated_xlist = np.linspace(0,1,xsteps)
-    shear_due_to_aero, b = interpolation_over_span(scaled_down_interpolated_xlist, x, Qvalues, CoP, la)
-
-    shearvalues = [0]
-    R1added = False
-    R2added = False
-    R3added = False
-    Padded = False
-    Aadded = False
-    for i in range(len(interpolated_xlist)):
-        localshear = shearvalues[-1] + shear_due_to_aero[i]
-
-        if interpolated_xlist[i]>x1 and R1added == False:
-            R1added = True
-            localshear = localshear + R1y[0]
-        if interpolated_xlist[i]>x2 and R2added == False:
-            R2added = True
-            localshear = localshear + R2y[0]
-        if interpolated_xlist[i]>x3 and R3added == False:
-            R3added = True
-            localshear = localshear + R3y[0]
-        if interpolated_xlist[i]>x2-xa/2 and Aadded == False:
-            Aadded = True
-            localshear = localshear+A[0]*m.sin(30/180.*m.pi)
-        if interpolated_xlist[i]>x2+xa/2 and Padded == False:
-            Padded = True
-            localshear = localshear-P*m.sin(30/180.*m.pi)
-
-        shearvalues.append(localshear)
-    shearvalues = shearvalues[1:]
-    return shearvalues,interpolated_xlist
-
-def internal_moment_calculations(shear, shear_x):
-    internal_moment_list = [0]
-    xdelta = shear_x[1] - shear_x[0]
-    for i in range(len(shear_x)):
-        internal_moment = internal_moment_list[-1] + shear[i]*xdelta
-        internal_moment_list.append(internal_moment)
-    internal_moment_list = internal_moment_list[1:]
-    return internal_moment_list
-
-def shear_force_in_z_calculations(R1x, x1, R2x, x2, R3x, x3, A, P, xa, la, xsteps):
-    interpolated_xlist=np.linspace(0,la,xsteps)
-    shearvalues = [0]
-    R1added = False
-    R2added = False
-    R3added = False
-    Padded = False
-    Aadded = False
-    for i in range(len(interpolated_xlist)):
-        localshear = shearvalues[-1]
-        if interpolated_xlist[i] > x1 and R1added == False:
-            R1added = True
-            localshear = localshear + R1x[0]
-        if interpolated_xlist[i] > x2 and R2added == False:
-            R2added = True
-            localshear = localshear + R2x[0]
-        if interpolated_xlist[i] > x3 and R3added == False:
-            R3added = True
-            localshear = localshear + R3x[0]
-        if interpolated_xlist[i] > x2 - xa / 2 and Aadded == False:
-            Aadded = True
-            localshear = localshear + A[0] * m.cos(30 / 180. * m.pi)
-        if interpolated_xlist[i] > x2 + xa / 2 and Padded == False:
-            Padded = True
-            localshear = localshear - P * m.cos(30 / 180. * m.pi)
-
-        shearvalues.append(localshear)
-    shearvalues = shearvalues[1:]
-    return shearvalues, interpolated_xlist
-
-
-shear_y, xcoords = shear_force_in_y_calculations(R1y,x1,R2y,x2,R3y,x3,A,P,xa,Qthingy,la,200)
-shear_z,xcoords2 = shear_force_in_z_calculations(R1z, x1, R2z, x2, R3z, x3, A, P, xa, la, 200)
-internal_moments_in_z = internal_moment_calculations(shear_z, xcoords)
-internal_moments_in_y = internal_moment_calculations(shear_y, xcoords)
-
-plt.plot(xcoords,shear_y)
-plt.show()
-plt.plot(xcoords,internal_moments_in_y)
-plt.show()
-
-print(np.shape(np.array(internal_moments_in_y)))
-xcoordslist = []
-for i in range(len(xcoords)):
-    xcoordslist.append(xcoords[i])
-
-
-print(xcoordslist)
-
-def deflection_integration(y,x):
-    integrated_values = [C1y]
-    for i in range(1,len(x)):
-        integrated_value = (y[i-1] + y[i])/2*(x[i-1]-x[i])/2 + C1y
-        integrated_values.append(integrated_value)
-
-    y = integrated_values
-    integrated_values = [C2y]
-    for i in range(1, len(x)):
-        integrated_value = (y[i - 1] + y[i]) / 2 * (x[i - 1] - x[i])/2 + C2y
-        integrated_values.append(integrated_value)
-    return integrated_values
-
-integrated_moments = deflection_integration(internal_moments_in_y,xcoordslist)
-
-
-
-'''
+vals = bigmatrix(P,x1,x2,x3,xa,Ca,h,E,Iyy_total,Izz_total,theta,interpolated_qvalues,Mx_Q,Mz_Q,Mz_Q_x1,Mz_Q_x2,Mz_Q_x3,G,J,T_A)
+print(vals)
 
 def maucaly(x, xn):
     return np.where(x>xn,x-xn,0)
@@ -456,21 +368,53 @@ def maucaly(x, xn):
 def maucaly0(x, xn):
     return np.where(x>xn,1,0)
 
-def deflection(x, one, two, three, A, P, C1, C2):
-    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3-A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3+P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+def deflectiony(x, one, two, three, A, P, C1, C2):
+    return -1/6/E/Izz_total*(one*maucaly(x,x1)**3+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3-q_y(x,3))+C1*x+C2
 
-def shear(x, one, two, three, A, P, C1, C2):
-    return one*maucaly0(x,x1)-A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)+P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
+def sheary(x, one, two, three, A, P, C1, C2):
+    return one*maucaly0(x,x1)+A*m.sin(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.sin(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)-q_y(x,0)
 
-def moment(x, one, two, three, A, P, C1, C2):
-    return one*maucaly(x,x1)**1-A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1+P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
+def momenty(x, one, two, three, A, P, C1, C2):
+    return one*maucaly(x,x1)**1+A*m.sin(theta/180*m.pi)*maucaly(x,x2-xa/2)**1+two*maucaly(x,x2)**1-P*m.sin(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1-q_y(x,1)
 
+
+def deflectionz(x, one, two, three, A, P, C1, C2):
+    return -1/6/E/Iyy_total*(one*maucaly(x,x1)**3+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**3+two*maucaly(x,x2)**3-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**3 +three*maucaly(x,x3)**3)+C1*x+C2
+
+def shearz(x, one, two, three, A, P, C1, C2):
+    return +one*maucaly0(x,x1)+A*m.cos(theta/180*m.pi)*maucaly0(x,x2-xa/2)+two*maucaly0(x,x2)-P*m.cos(theta/180*m.pi)*maucaly0(x,x2+xa/2) +three*maucaly0(x,x3)
+
+def momentz(x, one, two, three, A, P, C1, C2):
+    return +one*maucaly(x,x1)**1+A*m.cos(theta/180*m.pi)*maucaly(x,x2-xa/2)**+two*maucaly(x,x2)**1-P*m.cos(theta/180*m.pi)*maucaly(x,x2+xa/2)**1 +three*maucaly(x,x3)**1
 a  = np.linspace(0,la,1000)
 
+def twist(x, oney, twoy, threy, A, P, C):
+    s = -SC
+    t = theta/180*m.pi
+    return 1/G/J*(-oney*s*maucaly(x,x1)-twoy*s*maucaly(x,x2)-threy*s*maucaly(x,x3)-P*(m.sin(t)*s-m.cos(t)*h/2)*maucaly(x,x2+xa/2)+A*(m.cos(t)*h/2-m.sin(t)*s)*maucaly(x,x2-xa/2)-twoy*s*maucaly(x,x3)+q_t(x,0))
+
 #-47000, 65000, -18000
-plt.plot(a, shear(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.plot(a, sheary(a,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
-plt.plot(a, moment(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.plot(a, momenty(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
 plt.show()
-plt.plot(a, deflection(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
-plt.show()'''
+plt.plot(a, deflectiony(a, vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8]))
+plt.show()
+
+plt.plot(a, shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.show()
+plt.plot(a, momenty(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.show()
+plt.plot(a, deflectiony(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10]))
+plt.show()
+
+plt.plot(a, twist(a,vals[0],vals[1],vals[2], vals[6], P, vals[11]))
+plt.show()
+
+x = 0.2
+Vy =  sheary(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
+My =  momenty(x,vals[0],vals[1],vals[2], vals[6], P, vals[7], vals[8])[0]
+Vz = shearz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+Mz = momentz(a,vals[3],vals[4],vals[5], vals[6], P, vals[9], vals[10])[0]
+s = section(0.001, Vy,Vz,0,My,Mz)
+s.show()

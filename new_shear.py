@@ -210,7 +210,7 @@ plt.show()
 Iyy, Izz = Moment_of_Inertia.Moment_of_inertia()
 zbar = 0.204
 Acs = 0.002
-print(Iyy, Izz)
+print("...:", Iyy, Izz)
 
 class section():
     def __init__(self, ds, Vy, Vz, T, My=0, Mz=0):
@@ -327,5 +327,3 @@ class section():
         plt.axis('equal')
         plt.show()
 
-s = section(0.0001, 2000, 000, 0000, 00, 000)
-s.show()
